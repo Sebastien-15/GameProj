@@ -14,7 +14,7 @@ class Game:
         self.FPS = 0
         self.running = True
         self.bg_movement = 0
-        self.bg_name = 'BG1'
+        self.bg_name = 'BG3'
         pygame.font.init()
         self.font = pygame.font.Font(None, 32)
     
@@ -62,6 +62,7 @@ class Game:
 
     def draw(self):
         # Game Loop - Draw
+        self.screen.fill(BLACK)
         self.draw_background()
         self.all_sprites.draw(self.screen)
         self.screen.blit(self.font.render(f'FPS: {self.FPS}', True, GREEN), (0, 0))
@@ -81,9 +82,9 @@ class Game:
             else:
                 offset = (image_num / (len(bg_image_list) + 2))
             if bg_image_list[image_num] == 'layer-12.png':
-                Background_Layer(self, pygame.transform.scale(pygame.image.load(f'IMG/{self.bg_name}/{bg_image_list[image_num]}').convert_alpha(), (WIN_WIDTH, WIN_HEIGHT + 280)), offset) 
+                Background_Layer(self,pygame.image.load(f'IMG/{self.bg_name}/{bg_image_list[image_num]}').convert_alpha(),  offset) 
             else:   
-                Background_Layer(self, pygame.transform.scale(pygame.image.load(f'IMG/{self.bg_name}/{bg_image_list[image_num]}').convert_alpha(), (WIN_WIDTH, WIN_HEIGHT + 300)), offset)
+                Background_Layer(self, pygame.image.load(f'IMG/{self.bg_name}/{bg_image_list[image_num]}').convert_alpha(), offset)
 
 
     def main(self):
