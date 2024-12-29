@@ -62,7 +62,6 @@ class Game:
 
     def draw(self):
         # Game Loop - Draw
-        self.screen.fill(BLACK)
         self.draw_background()
         self.all_sprites.draw(self.screen)
         self.screen.blit(self.font.render(f'FPS: {self.FPS}', True, GREEN), (0, 0))
@@ -70,7 +69,7 @@ class Game:
         pygame.display.update()
     
     def draw_background(self):
-        for position_offset in range(500):
+        for position_offset in range(5):
             for background in self.background:
                 background.draw(position_offset)
     
