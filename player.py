@@ -47,9 +47,8 @@ class Player(pygame.sprite.Sprite):
             ran_x = random.randint(-3, 3)
             ran_y = random.randint(-3, 3)
             for sprite in self.game.all_sprites:
-                if sprite not in self.game.background:
-                    sprite.rect.x += ran_x
-                    sprite.rect.y += ran_y
+                sprite.rect.x += ran_x
+                sprite.rect.y += ran_y
         
     def camera_movement(self):
         # CAMERA MOVEMENT X-AXIS
@@ -194,7 +193,6 @@ class Attack(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = x  
         self.rect.y = y
-        print(self.rect.width)
 
     def animate(self):
         self.kill()
