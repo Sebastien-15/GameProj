@@ -34,6 +34,7 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
+        print(self.rect.width)
     
     def update(self):
         self.movement()
@@ -46,12 +47,10 @@ class Player(pygame.sprite.Sprite):
             ran_x = random.randint(-3, 3)
             ran_y = random.randint(-3, 3)
             for sprite in self.game.all_sprites:
-                sprite.rect.x += ran_x
-                sprite.rect.y += ran_y
+                if sprite not in self.game.background:
+                    sprite.rect.x += ran_x
+                    sprite.rect.y += ran_y
         
-            
-        
-    
     def camera_movement(self):
         # CAMERA MOVEMENT X-AXIS
         # If the player is at the edge of the screen, move the blocks instead of the player
@@ -71,6 +70,7 @@ class Player(pygame.sprite.Sprite):
         if self.dy < 0 and self.rect.y <= (WIN_WIDTH * (1 / 3)):
             for sprite in self.game.all_sprites:
                 sprite.rect.y -= self.dy
+                
     def collision_blocks(self):
         # Collision with the blocks
         for block in self.game.blocks:
@@ -194,6 +194,7 @@ class Attack(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = x  
         self.rect.y = y
+        print(self.rect.width)
 
     def animate(self):
         self.kill()

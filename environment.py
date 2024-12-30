@@ -43,26 +43,24 @@ class Border(pygame.sprite.Sprite):
     
 
 class Background_Layer(pygame.sprite.Sprite):
-    def __init__(self, game, image, offset):
+    def __init__(self, game, image, offset, layer_num, width, height):
         self.game = game
         self.groups = self.game.background
         pygame.sprite.Sprite.__init__(self, self.groups)
 
         self.offset = offset
-        self.image = image
+        self.layer_num = layer_num
+        self.image = pygame.Surface([width - 1, WIN_HEIGHT])
+        self.image.set_colorkey(BLACK)
+        self.image.blit(image, (layer_num * -width, 0))
+        
         self.rect = self.image.get_rect()
-        self.witdh = self.image.get_width()
-
-        self.image.blit(image, (0, 0))
-
-        self.rect.x = 0
-        self.rect.y = -300
     
     def update(self):
         self.rect.x = (self.game.bg_movement * self.offset)
     
     def draw(self, position_offset):
-        self.game.screen.blit(self.image, (self.rect.x + (self.witdh * position_offset), self.rect.y))
+        self.game.screen.blit(self.image, (self.rect.x + (self.rect.width * position_offset), self.rect.y))
     
     # def update(self):
     #     for x in range(1):   

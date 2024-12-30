@@ -19,6 +19,11 @@ class Game:
         self.font = pygame.font.Font(None, 32)
     
     def CreateBlock(self):
+        """Creates blocks based on the assigned letter:\n
+            g for grass\n
+            p for the player\n
+            e for the enemy\n
+            b for the border"""
         ground_images = []
         for image in os.listdir(f'IMG/Ground1'):   
             ground_images.append(pygame.image.load(f'IMG/Ground1/{image}').convert_alpha())
@@ -58,7 +63,8 @@ class Game:
     def update(self):
         # Game Loop - Update    
         self.all_sprites.update()
-        self.background.update()
+        if self.bg_movement:
+            self.background.update()
 
     def draw(self):
         # Game Loop - Draw
@@ -74,16 +80,33 @@ class Game:
                 background.draw(position_offset)
     
     def load_background(self):
-        bg_image_list = os.listdir(f'IMG/{self.bg_name}')
-        for image_num in range(len(bg_image_list)):
-            if image_num == 0:
+        "Loads the background layers, only called once"
+        # Loading the full preview and getting the width and the height
+        preview = pygame.image.load(f'IMG/{self.bg_name}/Preview.png')
+        preview_width = preview.get_width()
+        preview_height = preview.get_height()
+        
+        #
+        layers = pygame.image.load(f'IMG/{self.bg_name}/layers.png')
+        layers_width = layers.get_width()
+        total_layer_num = layers_width / preview_width
+        
+        for layer_num in range(int(total_layer_num)):
+            if layer_num == 0:
                 offset = 0.05
             else:
-                offset = (image_num / (len(bg_image_list) + 2))
-            if bg_image_list[image_num] == 'layer-12.png':
-                Background_Layer(self, pygame.transform.scale(pygame.image.load(f'IMG/{self.bg_name}/{bg_image_list[image_num]}').convert_alpha(), (WIN_WIDTH, WIN_HEIGHT + 280)), offset) 
-            else:   
-                Background_Layer(self, pygame.transform.scale(pygame.image.load(f'IMG/{self.bg_name}/{bg_image_list[image_num]}').convert_alpha(), (WIN_WIDTH, WIN_HEIGHT + 300)), offset)
+                offset = (layer_num / (total_layer_num + 2))
+            Background_Layer(self, pygame.transform.scale(layers, (layers_width, WIN_HEIGHT)), offset, layer_num, preview_width, preview_height)
+        # bg_image_list = os.listdir(f'IMG/{self.bg_name}')
+        # for image_num in range(len(bg_image_list)):
+        #     if image_num == 0:
+        #         offset = 0.05
+        #     else:
+        #         offset = (image_num / (len(bg_image_list) + 2))
+        #     if bg_image_list[image_num] == 'layer-12.png':
+        #         Background_Layer(self, pygame.transform.scale(pygame.image.load(f'IMG/{self.bg_name}/{bg_image_list[image_num]}').convert_alpha(), (WIN_WIDTH, WIN_HEIGHT + 280)), offset) 
+        #     else:   
+        #         Background_Layer(self, pygame.transform.scale(pygame.image.load(f'IMG/{self.bg_name}/{bg_image_list[image_num]}').convert_alpha(), (WIN_WIDTH, WIN_HEIGHT + 300)), offset)
 
 
     def main(self):
