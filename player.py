@@ -135,7 +135,7 @@ class Player(pygame.sprite.Sprite):
     def movement(self):
         self.dy = 0
         if self.knockbacked:
-            if pygame.time.get_ticks() - self.previous_hit_time > self.invincibility_time:
+            if pygame.time.get_ticks() - self.previous_hit_time > (self.invincibility_time - 200):
                 self.knockbacked = False
             else:
                 # Slowing down the knockback speed

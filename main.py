@@ -9,7 +9,7 @@ class Game:
     def __init__(self):
         pygame.init()
         self.screen = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
-        pygame.display.set_caption("Game")
+        pygame.display.set_caption("Project X")
         self.clock = pygame.time.Clock()
         self.FPS = 0
         self.running = True
