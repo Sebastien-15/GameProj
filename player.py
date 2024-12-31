@@ -34,7 +34,6 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
-        print(self.rect.width)
     
     def update(self):
         self.movement()
@@ -54,21 +53,23 @@ class Player(pygame.sprite.Sprite):
         # CAMERA MOVEMENT X-AXIS
         # If the player is at the edge of the screen, move the blocks instead of the player
         if self.dx > 0 and self.rect.x >= (WIN_WIDTH * (2 / 3)):
-            self.game.bg_movement -= self.dx
+            self.game.bg_movement = -self.dx
             for sprite in self.game.all_sprites:
                 sprite.rect.x -= self.dx
-        if self.dx < 0 and self.rect.x <= (WIN_WIDTH * (1 / 3)) and (self.game.border.sprites()[0].rect.x - self.dx) <= -5:
-            self.game.bg_movement -= self.dx
+        elif self.dx < 0 and self.rect.x <= (WIN_WIDTH * (1 / 3)) and (self.game.border.sprites()[0].rect.x - self.dx) <= -5:
+            self.game.bg_movement = -self.dx
             for sprite in self.game.all_sprites:
                 sprite.rect.x -= self.dx
+        else:
+            self.game.bg_movement = 0
         # CAMERA MOVEMENT Y-AXIS
         # If the player is at the edge of the screen, move the blocks instead of the player
         if self.dy > 0 and self.rect.y >= (WIN_HEIGHT - 80):
             for sprite in self.game.all_sprites:
-                sprite.rect.y -= self.dy
-        if self.dy < 0 and self.rect.y <= (WIN_WIDTH * (1 / 3)):
+                sprite.rect.y -= self.dy 
+        if self.dy < 0 and self.rect.y <= (WIN_HEIGHT * (1 / 2)):
             for sprite in self.game.all_sprites:
-                sprite.rect.y -= self.dy
+                sprite.rect.y -= self.dy 
                 
     def collision_blocks(self):
         # Collision with the blocks
@@ -132,18 +133,15 @@ class Player(pygame.sprite.Sprite):
 
 
     def movement(self):
-        if not self.knockbacked:
-            # Resetting displacement values
-            self.dx = 0
-            self.dy = 0
-        else:
-            if self.dx == 0:
+        self.dy = 0
+        if self.knockbacked:
+            if pygame.time.get_ticks() - self.previous_hit_time > self.invincibility_time:
                 self.knockbacked = False
             else:
                 # Slowing down the knockback speed
                 if self.dx > 0:
                     self.dx -= 2
-                if self.dx < 0:
+                elif self.dx < 0:
                     self.dx += 2
 
         # Reading all of the key presses
@@ -167,6 +165,20 @@ class Player(pygame.sprite.Sprite):
             if self.direction == 'left':
                 Attack(self.game, self.rect.x - self.rect.width, self.rect.y)   
 
+        if not keys[pygame.K_a] and not keys[pygame.K_d] and self.dx != 0 and not self.knockbacked:
+            if self.Jumping:
+                if self.dx > 0:
+                    self.dx -= 0.1
+                elif self.dx < 0:
+                    self.dx += 0.1
+            else:
+                if self.dx > 0 and self.dx % 0.25 == 0:
+                    self.dx -= 0.25
+                elif self.dx < 0 and self.dx % 0.25 == 0:
+                    self.dx += 0.25
+                else:
+                    self.dx = 0
+        
         # Gravity
         self.velocity_y += 1
         if self.velocity_y > 20:

@@ -1,5 +1,6 @@
 import pygame
 import os
+import math
 import random
 from config import *
 
@@ -43,7 +44,7 @@ class Border(pygame.sprite.Sprite):
     
 
 class Background_Layer(pygame.sprite.Sprite):
-    def __init__(self, game, image, offset, layer_num, width, height):
+    def __init__(self, game, image, offset, layer_num, width):
         self.game = game
         self.groups = self.game.background
         pygame.sprite.Sprite.__init__(self, self.groups)
@@ -57,7 +58,11 @@ class Background_Layer(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
     
     def update(self):
-        self.rect.x = (self.game.bg_movement * self.offset)
+        if self.game.bg_movement < 0:
+            self.dx = math.floor(self.game.bg_movement * self.offset)
+        else:
+            self.dx = math.ceil(self.game.bg_movement * self.offset)
+        self.rect.x += self.dx
     
     def draw(self, position_offset):
         self.game.screen.blit(self.image, (self.rect.x + (self.rect.width * position_offset), self.rect.y))

@@ -14,7 +14,7 @@ class Game:
         self.FPS = 0
         self.running = True
         self.bg_movement = 0
-        self.bg_name = 'BG2'
+        self.bg_name = 'BG1'
         pygame.font.init()
         self.font = pygame.font.Font(None, 32)
     
@@ -68,14 +68,15 @@ class Game:
 
     def draw(self):
         # Game Loop - Draw
+        self.screen.fill(BLACK)
         self.draw_background()
         self.all_sprites.draw(self.screen)
         self.screen.blit(self.font.render(f'FPS: {self.FPS}', True, GREEN), (0, 0))
-        self.clock.tick(FPS)
+        self.clock.tick(60)
         pygame.display.update()
     
     def draw_background(self):
-        for position_offset in range(5):
+        for position_offset in range(15):
             for background in self.background:
                 background.draw(position_offset)
     
@@ -84,30 +85,15 @@ class Game:
         # Loading the full preview and getting the width and the height
         preview = pygame.image.load(f'IMG/{self.bg_name}/Preview.png')
         preview_width = preview.get_width()
-        preview_height = preview.get_height()
         
         #
         layers = pygame.image.load(f'IMG/{self.bg_name}/layers.png')
-        layers_width = layers.get_width()
-        total_layer_num = layers_width / preview_width
+        adjusted_layers_width = (layers.get_width() * WIN_WIDTH) / preview_width
+        total_layer_num = layers.get_width() / preview_width
         
         for layer_num in range(int(total_layer_num)):
-            if layer_num == 0:
-                offset = 0.05
-            else:
-                offset = (layer_num / (total_layer_num + 2))
-            Background_Layer(self, pygame.transform.scale(layers, (layers_width, WIN_HEIGHT)), offset, layer_num, preview_width, preview_height)
-        # bg_image_list = os.listdir(f'IMG/{self.bg_name}')
-        # for image_num in range(len(bg_image_list)):
-        #     if image_num == 0:
-        #         offset = 0.05
-        #     else:
-        #         offset = (image_num / (len(bg_image_list) + 2))
-        #     if bg_image_list[image_num] == 'layer-12.png':
-        #         Background_Layer(self, pygame.transform.scale(pygame.image.load(f'IMG/{self.bg_name}/{bg_image_list[image_num]}').convert_alpha(), (WIN_WIDTH, WIN_HEIGHT + 280)), offset) 
-        #     else:   
-        #         Background_Layer(self, pygame.transform.scale(pygame.image.load(f'IMG/{self.bg_name}/{bg_image_list[image_num]}').convert_alpha(), (WIN_WIDTH, WIN_HEIGHT + 300)), offset)
-
+            offset = (layer_num / total_layer_num)
+            Background_Layer(self, pygame.transform.scale(layers, (adjusted_layers_width, WIN_HEIGHT)), offset, layer_num, WIN_WIDTH)
 
     def main(self):
         while self.playing:
