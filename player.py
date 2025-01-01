@@ -57,7 +57,7 @@ class Player(pygame.sprite.Sprite):
         scale_ratio_height = 0
         scale_ratio_width = 0
         for image in os.listdir(f'IMG/character/Idle'):
-            image = pygame.image.load(f'IMG/character/Idle/{image}').convert_alpha()
+            image = pygame.image.load(f'IMG/character/Idle/{image}')
             image_width = image.get_width() 
             image_height = image.get_height()
             scale_ratio_width = self.width / 26
@@ -65,12 +65,18 @@ class Player(pygame.sprite.Sprite):
             image_scaled = pygame.transform.scale(image, (math.floor(image_width * scale_ratio_width), math.floor(image_height * scale_ratio_height)))
             self.idle_images.append(image_scaled)
         for image in os.listdir(f'IMG/character/Run'):
-            image = pygame.image.load(f'IMG/character/Run/{image}').convert_alpha()
+            image = pygame.image.load(f'IMG/character/Run/{image}')
             image_scaled = pygame.transform.scale(image, (math.floor(image_width * scale_ratio_width), math.floor(image_height * scale_ratio_height)))
             self.run_images.append(image_scaled)
 
+    def flip(self):
+        # Flipping the player image
+        if self.direction == 'right':
+            self.image = pygame.transform.flip(self.image, False, False)
+        else:
+            self.image = pygame.transform.flip(self.image, True, False)
+
     def animate(self):
-        
         if pygame.time.get_ticks() - self.last_update > 100:
             self.frame += 1
             match self.state:
@@ -84,6 +90,7 @@ class Player(pygame.sprite.Sprite):
                         self.frame = 0
                     self.last_update = pygame.time.get_ticks()
                     self.image = self.run_images[self.frame]
+            self.flip()
     
     def update(self):
         self.animate()
