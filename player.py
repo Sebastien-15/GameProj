@@ -1,4 +1,5 @@
 import pygame
+import os
 from config import *
 import math
 import random
@@ -13,6 +14,9 @@ class Player(pygame.sprite.Sprite):
         self.y = y
         self.dx = 0
         self.dy = 0
+        self.width = 60
+        self.height = 80
+        
         # State variables
         self.direction = 'right'
         self.knockbacked = False
@@ -21,21 +25,53 @@ class Player(pygame.sprite.Sprite):
         self.falling = False
         self.velocity_y = 20
         self.camera_reset = False
+        self.state = 'idle'
+        self.frame = 0
+        self.last_update = pygame.time.get_ticks()
 
         self.previous_hit_time = pygame.time.get_ticks()
 
+        # Player Images
+        self.idle_images = []
+        self.load_images()
+
         # Player Image
-        image = pygame.image.load('player_idle.png')
-        self.image = pygame.Surface([30, 40])
+        # Calculating the scale ratio for the player image
+
+        # Loading the player image and scaling it
+
+        # Creating the player surface where the image will be blitted onto
+        self.image = pygame.Surface([self.width, self.height])
         self.image.set_colorkey(BLACK)
-        self.image.blit(image, (0, 0))
+        self.image.blit(self.idle_images[0], (0,0))
 
         # Player Rectangle
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
+
+    def load_images(self):
+        for image in os.listdir(f'IMG/character/Idle'):
+            image = pygame.image.load(f'IMG/character/Idle/{image}').convert_alpha()
+            image_width = image.get_width() 
+            image_height = image.get_height()
+            scale_ratio_width = self.width / 26
+            scale_ratio_height = self.height / 34
+            image_scaled = pygame.transform.scale(image, (math.floor(image_width * scale_ratio_width), math.floor(image_height * scale_ratio_height)))
+            self.idle_images.append(image_scaled)
+
+    def animate(self):
+        match self.state:
+            case 'idle':
+                if pygame.time.get_ticks() - self.last_update > 100:
+                    self.frame += 1
+                    if self.frame > 3:
+                        self.frame = 0
+                    self.last_update = pygame.time.get_ticks()
+                    self.image = self.idle_images[self.frame]
     
     def update(self):
+        self.animate()
         self.movement()
         self.camera_movement()
         self.camera_shake()
@@ -115,20 +151,20 @@ class Player(pygame.sprite.Sprite):
                         self.knockbacked = True
                         self.dx = 20
                 # Knockback in Y-axis
-                # elif enemy.rect.colliderect(self.rect.x, self.rect.y + self.dy, self.rect.width, self.rect.height):
-                #     self.previous_hit_time = pygame.time.get_ticks()
-                #     if self.dy > 0:
-                #         self.rect.y = enemy.rect.y - enemy.rect.height
-                #         self.velocity_y = -20
-                #         self.Jumping = True
-                #         self.falling = False
-                #         self.knockbacked = True
-                #     if self.dy < 0:
-                #         self.rect.y = enemy.rect.y + enemy.rect.height
-                #         self.velocity_y = 20
-                #         self.Jumping = False
-                #         self.falling = True
-                #         self.knockbacked = True
+                elif enemy.rect.colliderect(self.rect.x, self.rect.y + self.dy, self.rect.width, self.rect.height):
+                    self.previous_hit_time = pygame.time.get_ticks()
+                    if self.dy > 0:
+                        self.rect.y = enemy.rect.y - enemy.rect.height
+                        self.velocity_y = -20
+                        self.Jumping = True
+                        self.falling = False
+                        self.knockbacked = True
+                    if self.dy < 0:
+                        self.rect.y = enemy.rect.y + enemy.rect.height
+                        self.velocity_y = 20
+                        self.Jumping = False
+                        self.falling = True
+                        self.knockbacked = True
         
 
 
@@ -189,6 +225,7 @@ class Player(pygame.sprite.Sprite):
         self.collision_blocks()
         # Collision with the enemies
         self.collision_enemies()
+                
         
 class Attack(pygame.sprite.Sprite):
     def __init__(self, game, x, y):

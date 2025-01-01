@@ -17,7 +17,9 @@ class Block(pygame.sprite.Sprite):
 
         # Image of the block
         # image = pygame.transform.scale(pygame.image.load('IMG/BG1/grass.png').convert_alpha(), (self.width, self.height))
-        self.image = ground_images[random.randint(0, len(ground_images) - 1)]
+        # self.image = ground_images[random.randint(0, len(ground_images) - 1)]
+
+        self.image = pygame.Surface([self.width, self.height])
 
         # Rectangle of the block
         self.rect = self.image.get_rect()

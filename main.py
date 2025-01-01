@@ -14,7 +14,7 @@ class Game:
         self.FPS = 0
         self.running = True
         self.bg_movement = 0
-        self.bg_name = 'BG1'
+        self.bg_name = 'BG2'
         pygame.font.init()
         self.font = pygame.font.Font(None, 32)
     
@@ -51,6 +51,7 @@ class Game:
         self.background = pygame.sprite.LayeredUpdates()
         self.load_background()
         self.CreateBlock()
+        
     
     def events(self):
         # Game Loop - Events
