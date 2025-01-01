@@ -33,6 +33,7 @@ class Player(pygame.sprite.Sprite):
 
         # Player Images
         self.idle_images = []
+        self.run_images = []
         self.load_images()
 
         # Player Image
@@ -51,6 +52,10 @@ class Player(pygame.sprite.Sprite):
         self.rect.y = y
 
     def load_images(self):
+        image_width = 0
+        image_height = 0
+        scale_ratio_height = 0
+        scale_ratio_width = 0
         for image in os.listdir(f'IMG/character/Idle'):
             image = pygame.image.load(f'IMG/character/Idle/{image}').convert_alpha()
             image_width = image.get_width() 
@@ -59,16 +64,26 @@ class Player(pygame.sprite.Sprite):
             scale_ratio_height = self.height / 34
             image_scaled = pygame.transform.scale(image, (math.floor(image_width * scale_ratio_width), math.floor(image_height * scale_ratio_height)))
             self.idle_images.append(image_scaled)
+        for image in os.listdir(f'IMG/character/Run'):
+            image = pygame.image.load(f'IMG/character/Run/{image}').convert_alpha()
+            image_scaled = pygame.transform.scale(image, (math.floor(image_width * scale_ratio_width), math.floor(image_height * scale_ratio_height)))
+            self.run_images.append(image_scaled)
 
     def animate(self):
-        match self.state:
-            case 'idle':
-                if pygame.time.get_ticks() - self.last_update > 100:
-                    self.frame += 1
-                    if self.frame > 3:
+        
+        if pygame.time.get_ticks() - self.last_update > 100:
+            self.frame += 1
+            match self.state:
+                case 'idle':
+                    if self.frame > (len(self.idle_images) - 1):
                         self.frame = 0
                     self.last_update = pygame.time.get_ticks()
                     self.image = self.idle_images[self.frame]
+                case 'run':
+                    if self.frame > (len(self.run_images) - 1):
+                        self.frame = 0
+                    self.last_update = pygame.time.get_ticks()
+                    self.image = self.run_images[self.frame]
     
     def update(self):
         self.animate()
@@ -100,7 +115,7 @@ class Player(pygame.sprite.Sprite):
             self.game.bg_movement = 0
         # CAMERA MOVEMENT Y-AXIS
         # If the player is at the edge of the screen, move the blocks instead of the player
-        if self.dy > 0 and self.rect.y >= (WIN_HEIGHT - 80):
+        if self.dy > 0 and self.rect.y >= (WIN_HEIGHT - 100):
             for sprite in self.game.all_sprites:
                 sprite.rect.y -= self.dy 
         if self.dy < 0 and self.rect.y <= (WIN_HEIGHT * (1 / 2)):
@@ -169,6 +184,10 @@ class Player(pygame.sprite.Sprite):
 
 
     def movement(self):
+        if self.dx != 0 and not self.Jumping:
+            self.state = 'run'
+        else:
+            self.state = 'idle'
         self.dy = 0
         if self.knockbacked:
             if pygame.time.get_ticks() - self.previous_hit_time > (self.invincibility_time - 200):

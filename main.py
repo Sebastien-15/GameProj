@@ -14,7 +14,7 @@ class Game:
         self.FPS = 0
         self.running = True
         self.bg_movement = 0
-        self.bg_name = 'BG2'
+        self.bg_name = 'BG1'
         pygame.font.init()
         self.font = pygame.font.Font(None, 32)
     
