@@ -55,35 +55,27 @@ class Player(pygame.sprite.Sprite):
         self.rect.y = y
 
     def load_images(self):
-        image_width = 0
-        image_height = 0
-        scale_ratio_height = 0
-        scale_ratio_width = 0
-        for image in os.listdir(f'IMG/character/Player/Idle'):
-            image = pygame.image.load(f'IMG/character/Player/Idle/{image}')
-            image_width = image.get_width() 
-            image_height = image.get_height()
-            scale_ratio_width = self.width / 26
-            scale_ratio_height = self.height / 34
-            image_scaled = pygame.transform.scale(image, (math.floor(image_width * scale_ratio_width), math.floor(image_height * scale_ratio_height)))
-            self.idle_images.append(image_scaled)
-
-        for image in os.listdir(f'IMG/character/Player/Run'):
-            image = pygame.image.load(f'IMG/character/Player/Run/{image}')
-            image_scaled = pygame.transform.scale(image, (math.floor(image_width * scale_ratio_width), math.floor(image_height * scale_ratio_height)))
-            self.run_images.append(image_scaled)
-
-        for image in os.listdir(f'IMG/character/Player/Jump'):
-            image = pygame.image.load(f'IMG/character/Player/Jump/{image}')
-            image_scaled = pygame.transform.scale(image, (math.floor(image_width * scale_ratio_width), math.floor(image_height * scale_ratio_height)))
-            self.jump_images.append(image_scaled)
-
-        for image in os.listdir(f'IMG/character/Player/Attack'):
-            image = pygame.image.load(f'IMG/character/Player/Attack/{image}')
-            image_scaled = pygame.transform.scale(image, (math.floor(image_width * scale_ratio_width), math.floor(image_height * scale_ratio_height)))
-            self.attack_images.append(image_scaled)
-
-        self.damaged = pygame.transform.scale(pygame.image.load(f'IMG/character/Player/Damaged/damaged.png'), (math.floor(image_width * scale_ratio_width), math.floor(image_height * scale_ratio_height)))
+        states = os.listdir('IMG/character/Player/')
+        for state in states:
+            for image in os.listdir(f'IMG/character/Player/{state}'):
+                image = pygame.image.load(f'IMG/character/Player/{state.lower()}/{image}')
+                image_width = image.get_width() 
+                image_height = image.get_height()
+                scale_ratio_width = self.width / image_width
+                scale_ratio_height = self.height / image_height            
+                image_scaled = pygame.transform.scale(image, (math.floor(image_width * scale_ratio_width), math.floor(image_height * scale_ratio_height)))
+                match state:
+                    case "Idle":
+                        self.idle_images.append(image_scaled)
+                    case "Run":
+                        self.run_images.append(image_scaled)
+                    case "Jump":
+                        self.jump_images.append(image_scaled)
+                    case "Attack":
+                        self.attack_images.append(image_scaled)
+                    case "Damaged":
+                        self.damaged = image_scaled
+                        
 
     def flip(self):
         # Flipping the player image
@@ -232,12 +224,6 @@ class Player(pygame.sprite.Sprite):
 
 
     def movement(self):
-        if self.state != 'attack':
-            if self.dx != 0 and not self.Jumping:
-                self.state = 'run'
-            else:
-                self.state = 'idle'
-                
         self.dy = 0
         if self.knockbacked:
             if pygame.time.get_ticks() - self.previous_hit_time > (self.invincibility_time - 200):
@@ -251,10 +237,10 @@ class Player(pygame.sprite.Sprite):
 
         # Reading all of the key presses
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_a] and not self.knockbacked:
+        if keys[pygame.K_a] and not self.knockbacked and not keys[pygame.K_SPACE]:
             self.dx = -PLAYER_SPEED
             self.direction = 'left'
-        if keys[pygame.K_d] and not self.knockbacked:
+        if keys[pygame.K_d] and not self.knockbacked and not keys[pygame.K_SPACE]:
             self.dx = PLAYER_SPEED
             self.direction = 'right'
         if keys[pygame.K_w] and not self.Jumping and not self.falling and not self.knockbacked:
@@ -284,6 +270,13 @@ class Player(pygame.sprite.Sprite):
                 else:
                     self.dx = 0
         
+        
+        if self.state != 'attack':
+            if self.dx != 0 and not self.Jumping:
+                self.state = 'run'
+            else:
+                self.state = 'idle'
+        
         # Gravity
         self.velocity_y += 1
         if self.velocity_y > 20:
@@ -305,14 +298,20 @@ class Attack(pygame.sprite.Sprite):
         self.x = x
         self.y = y
 
-        self.image = pygame.Surface([40, 40])
-        self.image.fill((0, 0, 255))
+        self.image = pygame.Surface([60, 80])
+        self.image.set_colorkey(BLACK)
 
         self.rect = self.image.get_rect()
         self.rect.x = x  
         self.rect.y = y
+    
+    def collisioncheck(self):
+        for enemy in self.game.enemies:
+            if enemy.rect.colliderect(self.rect.x, self.rect.y, self.rect.width, self.rect.height):
+                print('hit an enemy')
 
     def animate(self):
+        self.collisioncheck()
         self.kill()
 
     def update(self):
