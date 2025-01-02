@@ -39,4 +39,3 @@ tilemap = [
     'gggggggggggg...gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg',
 ]
 
-print(len(tilemap[12]))
