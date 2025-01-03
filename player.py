@@ -11,25 +11,41 @@ class Player(pygame.sprite.Sprite):
         self.groups = self.game.all_sprites
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.x = x
+        """X-coordinate of the player"""
         self.y = y
+        """Y-coordinate of the player"""
         self.dx = 0
+        """Displacement in the x-axis"""
         self.dy = 0
+        """Displacement in the y-axis"""
         self.width = 60
+        """Width of the player"""
         self.height = 80
+        """Height of the player"""
         
         # State variables
         self.direction = 'right'
+        """Direction of the player"""
         self.knockbacked = False
+        """Boolean of whether the player is knocked back"""
         self.invincibility_time = 500
+        """Time the player is invincible after being hit"""
         self.Jumping = False
+        """Boolean of whether the player is jumping or not"""
         self.falling = False
-        self.velocity_y = 20
-        self.camera_reset = False
+        """Boolean of whether the player is falling or not"""
+        self.velocity_y = 20 
+        """This is the velocity of the player in the y-axis"""
         self.state = 'idle'
+        """Animation state of the player"""
         self.frame = 0
+        """Frame of the player animation"""
         self.last_update = pygame.time.get_ticks()
-
+        """Last time the player animation was updated"""
+        self.attack = None
+        """Attack object"""
         self.previous_hit_time = pygame.time.get_ticks()
+        """Last time the player was hit/damaged"""
 
         # Player Images
         self.idle_images = []
@@ -55,6 +71,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.y = y
 
     def load_images(self):
+        """Loads the player images"""
         states = os.listdir('IMG/character/Player/')
         for state in states:
             for image in os.listdir(f'IMG/character/Player/{state}'):
@@ -118,9 +135,11 @@ class Player(pygame.sprite.Sprite):
                         else:
                             if self.frame == 3:
                                 if self.direction == 'right':
-                                    Attack(self.game, self.rect.x + self.rect.width, self.rect.y)
+                                    self.attack = Attack(self.game, self.rect.x + self.rect.width, self.rect.y)
                                 elif self.direction == 'left':
-                                    Attack(self.game, self.rect.x - self.rect.width, self.rect.y)  
+                                    self.attack = Attack(self.game, self.rect.x - self.rect.width, self.rect.y) 
+                            else: 
+                                self.attack = None
                             self.last_update = pygame.time.get_ticks()
                             self.image = self.attack_images[self.frame]
             self.flip()

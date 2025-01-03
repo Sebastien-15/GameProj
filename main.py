@@ -15,6 +15,7 @@ class Game:
         self.running = True
         self.bg_movement = 0
         self.bg_name = 'BG1'
+        self.last_update = 0
         pygame.font.init()
         self.font = pygame.font.Font(None, 32)
     
@@ -62,10 +63,12 @@ class Game:
         self.FPS = math.floor(self.clock.get_fps())
     
     def update(self):
-        # Game Loop - Update    
-        self.all_sprites.update()
-        if self.bg_movement:
-            self.background.update()
+        # Game Loop - Update
+        if self.last_update < pygame.time.get_ticks():    
+            self.all_sprites.update()
+            if self.bg_movement:
+                self.background.update()
+            self.last_update = pygame.time.get_ticks() + 10
 
     def draw(self):
         # Game Loop - Draw
@@ -73,7 +76,7 @@ class Game:
         self.draw_background()
         self.all_sprites.draw(self.screen)
         self.screen.blit(self.font.render(f'FPS: {self.FPS}', True, GREEN), (0, 0))
-        self.clock.tick(60)
+        self.clock.tick(FPS)
         pygame.display.update()
     
     def draw_background(self):

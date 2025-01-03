@@ -1,5 +1,6 @@
 import pygame
 from config import *
+from utilities import *
 
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, game, x, y):
@@ -11,6 +12,11 @@ class Enemy(pygame.sprite.Sprite):
         self.y = y
         self.width = 40
         self.height = 40
+        self.dx = 0
+        self.dy = 0
+        self.velocity_y = 0
+        self.falling = False
+        self.knockbacked = False
 
         # Image of the block
         self.image = pygame.Surface([self.width, self.height])
@@ -22,5 +28,31 @@ class Enemy(pygame.sprite.Sprite):
         self.rect.y = y
     
     def update(self):
-        # print(self.game.bg_movement, self.rect.x)
-        pass
+        self.damaged()
+        self.movement()
+        collision_blocks(self)
+        gravity(self)
+    
+    def damaged(self):
+        player_attack = self.game.player.attack
+        if player_attack:
+            if self.rect.colliderect(player_attack.rect.x, player_attack.rect.y, player_attack.rect.width, player_attack.rect.height):
+                if self.game.player.direction == 'left':
+                    self.rect.x = player_attack.rect.x - player_attack.rect.width
+                    self.knockbacked = True
+                    self.dx = -20 
+                else:
+                    self.rect.x = player_attack.rect.x + player_attack.rect.width
+                    self.knockbacked = True
+                    self.dx = 20
+    
+    def movement(self):
+        # Collision with the enemies
+        # If the player collides with the enemy, the player will be knocked back
+        # The player will be knocked back for 1 second and invilnureabilty for 1 second
+        if self.dx != 0:
+            if self.dx < 0:
+                self.dx += 1
+            else:   
+                self.dx -= 1
+                    
