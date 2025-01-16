@@ -74,7 +74,7 @@ class Game:
     def draw(self):
         # Game Loop - Draw
         self.screen.fill(BLACK)
-        # self.draw_background()
+        self.draw_background()
         self.all_sprites.draw(self.screen)
         self.screen.blit(self.font.render(f'FPS: {self.FPS}', True, GREEN), (0, 0))
         self.clock.tick(FPS)

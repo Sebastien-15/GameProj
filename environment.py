@@ -10,8 +10,6 @@ class Block(pygame.sprite.Sprite):
         self._layer = BLOCK_LAYER
         self.groups = self.game.all_sprites, self.game.blocks
         pygame.sprite.Sprite.__init__(self, self.groups)
-        self.x = x
-        self.y = y
         self.width = 40
         self.height = 40
 
