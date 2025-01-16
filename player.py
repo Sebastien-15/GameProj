@@ -27,6 +27,7 @@ class Player(pygame.sprite.Sprite):
         self.direction = 'right'
         """Direction of the player"""
         self.knockbacked = False
+        self.camera_reset = [False, [0, 0]]
         """Boolean of whether the player is knocked back"""
         self.invincibility_time = 500
         """Time the player is invincible after being hit"""
@@ -154,22 +155,31 @@ class Player(pygame.sprite.Sprite):
         # Camera shake when the player is knocked back
         if self.knockbacked:
             ran_x = random.randint(-3, 3)
+            self.camera_reset[1][0] += ran_x
             ran_y = random.randint(-3, 3)
+            self.camera_reset[1][1] += ran_y
             for sprite in self.game.all_sprites:
                 sprite.rect.x += ran_x
                 sprite.rect.y += ran_y
+
+
+        elif self.camera_reset[0]:
+            for sprite in self.game.all_sprites:
+                sprite.rect.x -= self.camera_reset[1][0]
+                sprite.rect.y -= self.camera_reset[1][1]
+            self.camera_reset = [False, [0, 0]]
         
     def camera_movement(self):
         # CAMERA MOVEMENT X-AXIS
         # If the player is at the edge of the screen, move the blocks instead of the player
         if self.dx > 0 and self.rect.x >= (WIN_WIDTH * (2 / 3)):
-            self.game.bg_movement = -self.dx
+            self.game.bg_movement = math.ceil(-self.dx)
             for sprite in self.game.all_sprites:
-                sprite.rect.x -= self.dx
+                sprite.rect.x -= math.ceil(self.dx)
         elif self.dx < 0 and self.rect.x <= (WIN_WIDTH * (1 / 3)) and (self.game.border.sprites()[0].rect.x - self.dx) <= -5:
-            self.game.bg_movement = -self.dx
+            self.game.bg_movement = math.ceil(-self.dx)
             for sprite in self.game.all_sprites:
-                sprite.rect.x -= self.dx
+                sprite.rect.x -= math.ceil(self.dx)
         else:
             self.game.bg_movement = 0
         # CAMERA MOVEMENT Y-AXIS
@@ -247,6 +257,7 @@ class Player(pygame.sprite.Sprite):
         if self.knockbacked:
             if pygame.time.get_ticks() - self.previous_hit_time > (self.invincibility_time - 200):
                 self.knockbacked = False
+                self.camera_reset[0] = True
             else:
                 # Slowing down the knockback speed
                 if self.dx > 0:

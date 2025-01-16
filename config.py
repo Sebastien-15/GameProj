@@ -13,7 +13,7 @@ BROWN = (165, 42, 42)
 
 WIN_HEIGHT = 720
 WIN_WIDTH = 1280
-FPS = 10000   
+FPS = 60   
 
 PLAYER_LAYER = 1
 PLAYER_SPEED = 5
@@ -33,7 +33,7 @@ tilemap = [
     '................................................',
     '................................................',
     '................................................',
-    '....p....e....e...e.............................',
+    '....p.........e...................................',
     'ggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg',
     'gggggggggggg...gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg',
     'gggggggggggg...gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg',

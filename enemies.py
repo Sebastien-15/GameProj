@@ -28,31 +28,37 @@ class Enemy(pygame.sprite.Sprite):
         self.rect.y = y
     
     def update(self):
+        self.display_damage_numbers()
         self.damaged()
         self.movement()
         collision_blocks(self)
         gravity(self)
+
+    def display_damage_numbers(self):
+        if self.knockbacked:
+            self.game.screen.blit(self.game.font.render('1', True, RED), (self.rect.x, self.rect.y - 20))
     
     def damaged(self):
         player_attack = self.game.player.attack
         if player_attack:
             if self.rect.colliderect(player_attack.rect.x, player_attack.rect.y, player_attack.rect.width, player_attack.rect.height):
+                self.knockbacked = True
                 if self.game.player.direction == 'left':
                     self.rect.x = player_attack.rect.x - player_attack.rect.width
-                    self.knockbacked = True
                     self.dx = -20 
                 else:
                     self.rect.x = player_attack.rect.x + player_attack.rect.width
-                    self.knockbacked = True
                     self.dx = 20
     
     def movement(self):
         # Collision with the enemies
         # If the player collides with the enemy, the player will be knocked back
         # The player will be knocked back for 1 second and invilnureabilty for 1 second
-        if self.dx != 0:
+        if self.dx != 0 and self.knockbacked:
             if self.dx < 0:
                 self.dx += 1
             else:   
                 self.dx -= 1
+        else:
+            self.knockbacked = False
                     
