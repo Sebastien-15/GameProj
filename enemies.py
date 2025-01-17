@@ -1,4 +1,5 @@
 import pygame
+import random
 from config import *
 from utilities import *
 
@@ -17,6 +18,7 @@ class Enemy(pygame.sprite.Sprite):
         self.velocity_y = 0
         self.falling = False
         self.knockbacked = False
+        self.camera_reset = [False, [0, 0]]
 
         # Image of the block
         self.image = pygame.Surface([self.width, self.height])
@@ -27,13 +29,65 @@ class Enemy(pygame.sprite.Sprite):
         self.rect.x = x
         self.rect.y = y
     
-    def update(self):
-        self.damaged()
-        self.movement()
-        collision_blocks(self)
-        gravity(self)
+    def gravity(self):
+        # Gravity
+        self.velocity_y += 1
+        if self.velocity_y > 20:
+            self.velocity_y = 20
+        self.dy += self.velocity_y
+
+    def collision_blocks(self):
+        # Collision with the blocks
+        for block in self.game.blocks:
+            # Collision in X-axis
+            if block.rect.colliderect(self.rect.x + self.dx, self.rect.y, self.rect.width, self.rect.height):
+                self.dx = 0
+            # Collision in Y-axis
+            elif block.rect.colliderect(self.rect.x, self.rect.y + self.dy, self.rect.width, self.rect.height):
+                if self.velocity_y < 0:
+                    self.dy = block.rect.bottom - self.rect.top
+                    self.velocity_y = 0
+                    self.Jumping = False
+                    self.falling = True
+                if self.velocity_y > 0:
+                    self.dy = block.rect.top - self.rect.bottom
+                    self.velocity_y = 0
+                    self.Jumping = False
+                    self.falling = False
+        
+
+        # Update the position of the player
+        if self.dy > 0:
+            self.falling = True
+        self.rect.x += self.dx
+        self.rect.y += self.dy
 
     
+    def update(self):
+        self.collision_blocks()
+        self.damaged()
+        self.movement()
+        self.camera_shake()
+        self.gravity()
+        
+    def camera_shake(self):
+        # Camera shake when the player is knocked back
+        if self.knockbacked:
+            ran_x = random.randint(-2, 2)
+            self.camera_reset[1][0] += ran_x
+            ran_y = random.randint(0, 0)
+            self.camera_reset[1][1] += ran_y
+            for sprite in self.game.all_sprites:
+                sprite.rect.x += ran_x
+                sprite.rect.y += ran_y
+
+
+        elif self.camera_reset[0]:
+            for sprite in self.game.all_sprites:
+                sprite.rect.x -= self.camera_reset[1][0]
+                sprite.rect.y -= self.camera_reset[1][1]
+            self.camera_reset = [False, [0, 0]]
+
     def damaged(self):
         player_attack = self.game.player.attack
         if player_attack:
@@ -59,6 +113,7 @@ class Enemy(pygame.sprite.Sprite):
         else:
             if self.knockbacked:
                 self.knockbacked = False
+                self.camera_reset[0] = True
                 self.damage_num.kill()
             
                     

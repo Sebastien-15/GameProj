@@ -18,9 +18,9 @@ class Player(pygame.sprite.Sprite):
         """Displacement in the x-axis"""
         self.dy = 0
         """Displacement in the y-axis"""
-        self.width = 60
+        self.width = 50
         """Width of the player"""
-        self.height = 80
+        self.height = 70
         """Height of the player"""
         
         # State variables
@@ -76,23 +76,24 @@ class Player(pygame.sprite.Sprite):
         states = os.listdir('IMG/character/Player/')
         for state in states:
             for image in os.listdir(f'IMG/character/Player/{state}'):
-                image = pygame.image.load(f'IMG/character/Player/{state.lower()}/{image}')
-                image_width = image.get_width() 
-                image_height = image.get_height()
-                scale_ratio_width = self.width / image_width
-                scale_ratio_height = self.height / image_height            
-                image_scaled = pygame.transform.scale(image, (math.floor(image_width * scale_ratio_width), math.floor(image_height * scale_ratio_height)))
-                match state:
-                    case "Idle":
-                        self.idle_images.append(image_scaled)
-                    case "Run":
-                        self.run_images.append(image_scaled)
-                    case "Jump":
-                        self.jump_images.append(image_scaled)
-                    case "Attack":
-                        self.attack_images.append(image_scaled)
-                    case "Damaged":
-                        self.damaged = image_scaled
+                if image != 'states.png':
+                    image = pygame.image.load(f'IMG/character/Player/{state}/{image}').convert_alpha()
+                    image_width = image.get_width() 
+                    image_height = image.get_height()
+                    scale_ratio_width = self.width / image_width
+                    scale_ratio_height = self.height / image_height            
+                    image_scaled = pygame.transform.scale(image, (math.floor(image_width * scale_ratio_width), math.floor(image_height * scale_ratio_height)))
+                    match state:
+                        case "Idle":
+                            self.idle_images.append(image_scaled)
+                        case "Run":
+                            self.run_images.append(image_scaled)
+                        case "Jump":
+                            self.jump_images.append(image_scaled)
+                        case "Attack":
+                            self.attack_images.append(image_scaled)
+                        case "Damaged":
+                            self.damaged = image_scaled
                         
 
     def flip(self):
@@ -107,12 +108,12 @@ class Player(pygame.sprite.Sprite):
             self.frame += 1
             if self.Jumping and not self.falling and not self.knockbacked and self.state != 'attack':
                 if self.frame > (len(self.jump_images) - 1):
-                    self.frame = len(self.jump_images) - 1
+                    self.frame = len(self.jump_images) - 3
                 self.last_update = pygame.time.get_ticks()
                 self.image = self.jump_images[self.frame]
             elif self.falling and not self.knockbacked and self.state != 'attack':
                 if self.frame > (len(self.jump_images) - 1):
-                    self.frame = len(self.jump_images) - 1
+                    self.frame = len(self.jump_images) - 3
                 self.last_update = pygame.time.get_ticks()
                 self.image = self.jump_images[self.frame]
             elif self.knockbacked and self.state != 'attack':
@@ -133,12 +134,13 @@ class Player(pygame.sprite.Sprite):
                         if self.frame > (len(self.attack_images) - 1):
                             self.frame = 0
                             self.state = 'idle'
+                            self.attack = None
                         else:
-                            if self.frame == 3:
+                            if self.frame == 2 or self.frame == 4:
                                 if self.direction == 'right':
-                                    self.attack = Attack(self.game, self.rect.x + self.rect.width, self.rect.y)
+                                    self.attack = Attack(self.game, self.rect.x + self.rect.width, self.rect.y, 'slash')
                                 elif self.direction == 'left':
-                                    self.attack = Attack(self.game, self.rect.x - self.rect.width, self.rect.y) 
+                                    self.attack = Attack(self.game, self.rect.x - self.rect.width - 10, self.rect.y, 'slash') 
                             else: 
                                 self.attack = None
                             self.last_update = pygame.time.get_ticks()
@@ -267,10 +269,10 @@ class Player(pygame.sprite.Sprite):
 
         # Reading all of the key presses
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_a] and not self.knockbacked and not keys[pygame.K_SPACE]:
+        if keys[pygame.K_a] and not self.knockbacked:
             self.dx = -PLAYER_SPEED
             self.direction = 'left'
-        if keys[pygame.K_d] and not self.knockbacked and not keys[pygame.K_SPACE]:
+        if keys[pygame.K_d] and not self.knockbacked:
             self.dx = PLAYER_SPEED
             self.direction = 'right'
         if keys[pygame.K_w] and not self.Jumping and not self.falling and not self.knockbacked:
@@ -300,6 +302,9 @@ class Player(pygame.sprite.Sprite):
                 else:
                     self.dx = 0
         
+        if self.state == 'attack' and not self.Jumping:
+            self.dx = 0
+        
         
         if self.state != 'attack':
             if self.dx != 0 and not self.Jumping:
@@ -320,29 +325,37 @@ class Player(pygame.sprite.Sprite):
                 
         
 class Attack(pygame.sprite.Sprite):
-    def __init__(self, game, x, y):
+    def __init__(self, game, x, y, attack_type):
         self.game = game
         self._layer = PLAYER_LAYER
         self.groups = self.game.all_sprites, self.game.attacks
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.x = x
         self.y = y
+        self.attack_type = attack_type
 
-        self.image = pygame.Surface([60, 80])
+        self.image = pygame.Surface([60, 40])
         self.image.set_colorkey(BLACK)
+        self.image.fill(BLUE)
 
         self.rect = self.image.get_rect()
-        self.rect.x = x  
-        self.rect.y = y
+        if self.attack_type == 'slash':
+            self.rect.x = x 
+            self.rect.y = y + random.randint(0, 30)
+        
+        self.kill_timer = pygame.time.get_ticks()
+        self.camera_reset = [False, [0, 0]]
     
     def collisioncheck(self):
         for enemy in self.game.enemies:
             if enemy.rect.colliderect(self.rect.x, self.rect.y, self.rect.width, self.rect.height):
                 print('hit an enemy')
+                
 
     def animate(self):
         self.collisioncheck()
-        self.kill()
+        if pygame.time.get_ticks() >= self.kill_timer + 100:
+            self.kill()
 
     def update(self):
         self.animate()

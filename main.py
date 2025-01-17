@@ -14,7 +14,7 @@ class Game:
         self.FPS = 0
         self.running = True
         self.bg_movement = 0
-        self.bg_name = 'BG2'
+        self.bg_name = 'BG1'
         self.last_update = 0
         pygame.font.init()
         self.font = pygame.font.Font(None, 32)
@@ -88,11 +88,11 @@ class Game:
     def load_background(self):
         "Loads the background layers, only called once"
         # Loading the full preview and getting the width and the height
-        preview = pygame.image.load(f'IMG/{self.bg_name}/Preview.png')
+        preview = pygame.image.load(f'IMG/{self.bg_name}/Preview.png').convert_alpha()
         preview_width = preview.get_width()
         
         #
-        layers = pygame.image.load(f'IMG/{self.bg_name}/layers.png')
+        layers = pygame.image.load(f'IMG/{self.bg_name}/layers.png').convert_alpha()
         adjusted_layers_width = (layers.get_width() * WIN_WIDTH) / preview_width
         total_layer_num = layers.get_width() / preview_width
         
