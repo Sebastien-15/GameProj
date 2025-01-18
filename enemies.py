@@ -39,21 +39,22 @@ class Enemy(pygame.sprite.Sprite):
     def collision_blocks(self):
         # Collision with the blocks
         for block in self.game.blocks:
-            # Collision in X-axis
-            if block.rect.colliderect(self.rect.x + self.dx, self.rect.y, self.rect.width, self.rect.height):
-                self.dx = 0
-            # Collision in Y-axis
-            elif block.rect.colliderect(self.rect.x, self.rect.y + self.dy, self.rect.width, self.rect.height):
-                if self.velocity_y < 0:
-                    self.dy = block.rect.bottom - self.rect.top
-                    self.velocity_y = 0
-                    self.Jumping = False
-                    self.falling = True
-                if self.velocity_y > 0:
-                    self.dy = block.rect.top - self.rect.bottom
-                    self.velocity_y = 0
-                    self.Jumping = False
-                    self.falling = False
+            if not block.walkthrough:
+                # Collision in X-axis
+                if block.rect.colliderect(self.rect.x + self.dx, self.rect.y, self.rect.width, self.rect.height):
+                    self.dx = 0
+                # Collision in Y-axis
+                elif block.rect.colliderect(self.rect.x, self.rect.y + self.dy, self.rect.width, self.rect.height):
+                    if self.velocity_y < 0:
+                        self.dy = block.rect.bottom - self.rect.top
+                        self.velocity_y = 0
+                        self.Jumping = False
+                        self.falling = True
+                    if self.velocity_y > 0:
+                        self.dy = block.rect.top - self.rect.bottom
+                        self.velocity_y = 0
+                        self.Jumping = False
+                        self.falling = False
         
 
         # Update the position of the player
@@ -73,7 +74,7 @@ class Enemy(pygame.sprite.Sprite):
     def camera_shake(self):
         # Camera shake when the player is knocked back
         if self.knockbacked:
-            ran_x = random.randint(-2, 2)
+            ran_x = random.randint(-1, 1)
             self.camera_reset[1][0] += ran_x
             ran_y = random.randint(0, 0)
             self.camera_reset[1][1] += ran_y

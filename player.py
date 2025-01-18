@@ -22,12 +22,17 @@ class Player(pygame.sprite.Sprite):
         """Width of the player"""
         self.height = 70
         """Height of the player"""
+        self.camera_speed_x = 0
+        self.camera_speed_y = 0
         
         # State variables
         self.direction = 'right'
         """Direction of the player"""
-        self.knockbacked = False
         self.camera_reset = [False, [0, 0]]
+        """Variable containing:\n
+        0: boolean to specify whether camera reset has been enabled or not\n
+        1: an array containing the changes done in x and y"""
+        self.knockbacked = False
         """Boolean of whether the player is knocked back"""
         self.invincibility_time = 500
         """Time the player is invincible after being hit"""
@@ -174,43 +179,71 @@ class Player(pygame.sprite.Sprite):
     def camera_movement(self):
         # CAMERA MOVEMENT X-AXIS
         # If the player is at the edge of the screen, move the blocks instead of the player
-        if self.dx > 0 and self.rect.x >= (WIN_WIDTH * (2 / 3)):
-            self.game.bg_movement = math.floor(-self.dx)
-            for sprite in self.game.all_sprites:
-                sprite.rect.x -= math.ceil(self.dx)
-        elif self.dx < 0 and self.rect.x <= (WIN_WIDTH * (1 / 3)) and (self.game.border.sprites()[0].rect.x - self.dx) <= -5:
-            self.game.bg_movement = math.ceil(-self.dx)
-            for sprite in self.game.all_sprites:
-                sprite.rect.x -= math.floor(self.dx)
+        
+        if self.rect.x >= (WIN_WIDTH * (2 / 3)):
+            if self.camera_speed_x < 4:
+                self.camera_speed_x += 0.3
+            
+        elif self.rect.x <= (WIN_WIDTH * (1 / 3)) and self.game.border.sprites()[0].rect.x < -self.game.border.sprites()[0].width:
+            if self.camera_speed_x > -5:
+                self.camera_speed_x -= 0.3
         else:
-            self.game.bg_movement = 0
+            if self.camera_speed_x != 0:
+                if self.camera_speed_x > 0:
+                    if self.camera_speed_x < 0.2:
+                        self.camera_speed_x = 0
+                    else:
+                        self.camera_speed_x -= 0.2
+                elif self.camera_speed_x < 0:
+                    if self.camera_speed_x > -0.2 or self.game.border.sprites()[0].rect.x > -self.game.border.sprites()[0].width:
+                        self.camera_speed_x = 0
+                    else:
+                        self.camera_speed_x += 0.2
         # CAMERA MOVEMENT Y-AXIS
         # If the player is at the edge of the screen, move the blocks instead of the player
-        if self.dy > 0 and self.rect.y >= (WIN_HEIGHT - 100):
-            for sprite in self.game.all_sprites:
-                sprite.rect.y -= self.dy 
-        if self.dy < 0 and self.rect.y <= (WIN_HEIGHT * (1 / 2)):
-            for sprite in self.game.all_sprites:
-                sprite.rect.y -= self.dy 
+        if self.rect.y >= (WIN_HEIGHT * (3/4)):
+            if self.camera_speed_y < 9:
+                self.camera_speed_y += 0.3
+        elif self.rect.y <= (WIN_HEIGHT * (1 / 3)):
+            if self.camera_speed_y > -7:
+                self.camera_speed_y -= 0.3
+        else:
+            if self.camera_speed_y != 0:
+                if self.camera_speed_y > 0:
+                    if self.camera_speed_y < 0.6:
+                        self.camera_speed_y = 0
+                    else:
+                        self.camera_speed_y -= 0.6
+                elif self.camera_speed_y < 0:
+                    if self.camera_speed_y > -0.2:
+                        self.camera_speed_y = 0
+                    else:
+                        self.camera_speed_y += 0.2
                 
+        self.game.bg_movement = math.floor(-self.camera_speed_x)
+        for sprite in self.game.all_sprites:
+            sprite.rect.x -= math.ceil(self.camera_speed_x) 
+            sprite.rect.y -= math.ceil(self.camera_speed_y)
+                 
     def collision_blocks(self):
         # Collision with the blocks
         for block in self.game.blocks:
+            if not block.walkthrough:
             # Collision in X-axis
-            if block.rect.colliderect(self.rect.x + self.dx, self.rect.y, self.rect.width, self.rect.height):
-                self.dx = 0
-            # Collision in Y-axis
-            if block.rect.colliderect(self.rect.x, self.rect.y + self.dy, self.rect.width, self.rect.height):
-                if self.velocity_y < 0:
-                    self.dy = block.rect.bottom - self.rect.top
-                    self.velocity_y = 0
-                    self.Jumping = False
-                    self.falling = True
-                elif self.velocity_y >= 0:
-                    self.dy = block.rect.top - self.rect.bottom
-                    self.velocity_y = 0
-                    self.Jumping = False
-                    self.falling = False
+                if block.rect.colliderect(self.rect.x + self.dx, self.rect.y, self.rect.width, self.rect.height):
+                    self.dx = 0
+                # Collision in Y-axis
+                if block.rect.colliderect(self.rect.x, self.rect.y + self.dy, self.rect.width, self.rect.height):
+                    if self.velocity_y < 0:
+                        self.dy = block.rect.bottom - self.rect.top
+                        self.velocity_y = 0
+                        self.Jumping = False
+                        self.falling = True
+                    elif self.velocity_y >= 0:
+                        self.dy = block.rect.top - self.rect.bottom
+                        self.velocity_y = 0
+                        self.Jumping = False
+                        self.falling = False
         
 
         # Update the position of the player
