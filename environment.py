@@ -101,7 +101,7 @@ class Vegetation(pygame.sprite.Sprite):
                 self.rect.y = y - self.height 
         
     def animate(self):
-        if pygame.time.get_ticks() - self.last_update > 150:
+        if pygame.time.get_ticks() - self.last_update > 125:
             self.frame +=1
             self.last_update = pygame.time.get_ticks()
             if self.frame == len(self.game.vegetation_images[self.asset_type]) - 1:
