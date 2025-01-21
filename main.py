@@ -12,7 +12,7 @@ class Game:
         pygame.display.set_caption("Project X")
         self.clock = pygame.time.Clock()
         self.FPS = 0
-        self.running = True
+        self.running = True 
         self.bg_movement = 0
         self.bg_name = 'BG1'
         self.last_update = 0
@@ -22,19 +22,25 @@ class Game:
         self.block_images = dict()
         self.vegetation_images = dict()
         
-        self.rectangle_draw_time = pygame.time.get_ticks()
+        self.background_layer_1_last_update = 0
+        self.background_layer_2_last_update = -1500
     
     def CreateBlock(self):
         """Creates blocks based on the assigned letter:\n
             g for grass\n
             p for the player\n
             e for the enemy\n
-            b for the border\n
+            b for the border\a
             s for passthrough blocks"""
+        # Background_layer_2(self, 0)
+        # Background_layer_2(self, 1)
+        # Background_layer_2(self, 2)
+        # Background_layer_2(self, 3)
+        # Background_layer_2(self, 4)
+        # Background_layer_2(self, 5)
         ground_images = []
         for image in os.listdir(f'IMG/Ground1'):   
             ground_images.append(pygame.image.load(f'IMG/Ground1/{image}').convert_alpha())
-
         for i, row in enumerate(tilemap):
             for j, tile in enumerate(row):
                 match tile:
@@ -76,6 +82,48 @@ class Game:
                         Enemy(self, j * 40, i * 40)
                     case 'b':
                         Border(self, j * 40, i * 40)
+
+        # for i, row in enumerate(tilemap):
+            for j, tile in enumerate(row):
+                match tile:
+                    case '/IMG/block_01.png':
+                        Block(self, i * 40, j * 40)
+                    case '/IMG/block_05.png':
+                        Block(self, i * 40, j * 40, has_sides=False)
+                    case '/IMG/block_03.png':
+                        Block(self, i * 40, j * 40, rotation='upside_down')
+                    case '/IMG/block_02.png':
+                        Block(self, i * 40, j * 40, rotation='left')
+                    case '/IMG/block_04.png':
+                        Block(self, i * 40, j * 40, rotation='right')
+                    case '/IMG/intersection_01.png':
+                        Block(self, i * 40, j * 40, intersection=True)
+                    case '/IMG/intersection_02.png':
+                        Block(self, i * 40, j * 40, intersection=True, rotation='left')
+                    case '/IMG/intersection_03.png':
+                        Block(self, i * 40, j * 40, intersection=True, rotation='upside_down')
+                    case '/IMG/intersection_04.png':
+                        Block(self, i * 40, j * 40, intersection=True, rotation='right')
+                    case '/IMG/border_01.png':
+                        Block(self, i * 40, j * 40, border=True)
+                    case '/IMG/border_02.png':
+                        Block(self, i * 40, j * 40, border=True, rotation='left')
+                    case '/IMG/border_03.png':
+                        Block(self, i * 40, j * 40, border=True, rotation='upside_down')
+                    case '/IMG/border_04.png':
+                        Block(self, i * 40, j * 40, border=True, rotation='right')
+                    case '/IMG/walkthrough_01.png':
+                        Block(self, i * 40, j * 40, walkthrough=True)
+                    case '/IMG/tree.png':
+                        Block(self, i * 40, j * 40, asset_type= 0)
+                    case '/IMG/bush.png':
+                        Block(self, i * 40, j * 40, asset_type= 1)
+                    case '/IMG/idle_1.png':
+                        self.player = Player(self, i * 40, j * 40)
+                    case '/IMG/enemy_1.png':
+                        Enemy(self, i * 40, j * 40)
+                    case 'b':
+                        Border(self, i * 40, j * 40)
                         
     
 
@@ -88,6 +136,8 @@ class Game:
         self.attacks = pygame.sprite.LayeredUpdates()
         self.border = pygame.sprite.LayeredUpdates()
         self.background = pygame.sprite.LayeredUpdates()
+        self.enemy_projectiles = pygame.sprite.LayeredUpdates()
+        self.enemy_projectiles_fast = pygame.sprite.LayeredUpdates()
         self.load_background()
         self.CreateBlock()
         
@@ -113,7 +163,7 @@ class Game:
         self.screen.fill(BG_COLORS[0])
         self.draw_background()
         self.all_sprites.draw(self.screen)
-        self.screen.blit(self.font.render(f'FPS: {self.FPS}', True, GREEN), (0, 0))
+        self.screen.blit(self.font.render(f'FPS: {self.FPS}', True, GREEN), (WIN_WIDTH / 3, WIN_HEIGHT / 3))
         self.clock.tick(FPS)
         pygame.display.update()
     
@@ -121,10 +171,13 @@ class Game:
         # for position_offset in range(15):
         #     for background in self.background:
         #         background.draw(position_offset)
-        # timing = random.randint
-        if pygame.time.get_ticks() - self.rectangle_draw_time >= 100:
-            Background_rectangles(self)
-            self.rectangle_draw_time = pygame.time.get_ticks()
+        
+        if pygame.time.get_ticks() - self.background_layer_1_last_update >= 100:
+            Background_layer_1(self)
+            self.background_layer_1_last_update = pygame.time.get_ticks()
+        # if pygame.time.get_ticks() - self.background_layer_2_last_update >= 1500:
+        #     Background_layer_2(self, 0)
+        #     self.background_layer_2_last_update = pygame.time.get_ticks()
     
     def load_background(self):
         "Loads the background layers, only called once"

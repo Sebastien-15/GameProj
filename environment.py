@@ -109,17 +109,19 @@ class Vegetation(pygame.sprite.Sprite):
                 self.width = TREE_WIDTH
                 self.height = TREE_HEIGHT
                 self.animation_speed = 125
+                x = x - (self.width / 2)
             case 1:
                 self.width = BUSH_WIDTH
                 self.height = BUSH_HEIGHT
                 self.animation_speed = 150
+                x = x - (self.width / 3)
         
         self.image = pygame.Surface([self.width, self.height])
         self.image.set_colorkey(BLACK)
         self.image.blit(self.game.vegetation_images[asset_type][self.frame], (0, 0))
         
         self.rect = self.image.get_rect()
-        self.rect.x = x - (self.width / 2)
+        self.rect.x = x
         self.rect.y = y - self.height 
         
     def animate(self):
@@ -133,7 +135,7 @@ class Vegetation(pygame.sprite.Sprite):
     def update(self):
         self.animate()
 
-class Background_rectangles(pygame.sprite.Sprite):
+class Background_layer_1(pygame.sprite.Sprite):
     def __init__(self, game):
         self.game = game
         self._layer = 0
@@ -145,7 +147,7 @@ class Background_rectangles(pygame.sprite.Sprite):
         self.last_update = pygame.time.get_ticks()
         self.fall_speed = random.randint(3, 5)
         
-        self.image = pygame.Surface([self.size, self.size])
+        self.image = pygame.Surface([self.size, self.size], pygame.SRCALPHA)
         self.image.fill(WHITE)
         self.image.set_colorkey(WHITE)
         self.rect = self.image.get_rect()
@@ -155,7 +157,7 @@ class Background_rectangles(pygame.sprite.Sprite):
         
         self.rectangle = pygame.Rect((0, 0, self.size, self.size))
 
-        pygame.draw.rect(self.image, BLACK, self.rectangle, random.choice([4, 4, 4, 10, 10, 10, 10, 10, 10, 10,]))
+        pygame.draw.rect(self.image, BLACK_2, self.rectangle, random.choice([4, 4, 4, 10, 10, 10, 10, 10, 10, 10,]))
     
     def update(self):
         self.rotate()
@@ -175,5 +177,43 @@ class Background_rectangles(pygame.sprite.Sprite):
     def movement(self):
         self.rect.y += self.fall_speed
         
+
+class Background_layer_2(pygame.sprite.Sprite):
+    def __init__(self, game, offset):
+        self.game = game
+        self._layer = 1
+        self.groups = self.game.all_sprites
+        pygame.sprite.Sprite.__init__(self, self.groups)
+        self.height = 80
+        self.width = 3200
+        self.last_update = pygame.time.get_ticks()
+        self.fall_speed = random.randint(3, 5)
+        self.offset = offset
+        
+        self.image = pygame.Surface([self.width, self.height])
+        self.image.fill(BG_COLORS[0])
+        self.image.set_colorkey(WHITE)
+        self.rect = self.image.get_rect()
+        self.rect.x = WIN_WIDTH - (270 * offset)
+        self.rect.y = WIN_HEIGHT - (270 * offset)
+        
+        self.rectangle = pygame.Rect((0, 0, self.width, self.height))
+
+        pygame.draw.rect(self.image, BLACK, self.rectangle, 1)
+        self.image = pygame.transform.rotate(self.image, 45)
+    
+    def update(self):
+        self.movement()
+        if self.rect.y <= -WIN_WIDTH - self.height:
+            # self.rect.x = WIN_WIDTH - (270 * self.offset)
+            # self.rect.y = WIN_HEIGHT - (270 * self.offset)
+            self.kill()
+        
+    
+    def movement(self):
+        if pygame.time.get_ticks() - self.last_update >= 10:
+            self.rect.x -= 2
+            self.rect.y -= 2
+            self.last_update = pygame.time.get_ticks()
         
         

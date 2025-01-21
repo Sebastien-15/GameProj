@@ -19,6 +19,9 @@ class Enemy(pygame.sprite.Sprite):
         self.falling = False
         self.knockbacked = False
         self.camera_reset = [False, [0, 0]]
+        self.last_shot = pygame.time.get_ticks()
+        self.last_shot_f = pygame.time.get_ticks()
+        
 
         # Image of the block
         self.image = pygame.Surface([self.width, self.height])
@@ -65,6 +68,7 @@ class Enemy(pygame.sprite.Sprite):
 
     
     def update(self):
+        # self.shoot()
         self.collision_blocks()
         self.damaged()
         self.movement()
@@ -116,5 +120,59 @@ class Enemy(pygame.sprite.Sprite):
                 self.knockbacked = False
                 self.camera_reset[0] = True
                 self.damage_num.kill()
-            
+    
+    def shoot(self):
+        if pygame.time.get_ticks() - self.last_shot_f >= 1000:
+            speed_x = 0
+            if self.game.player.rect.x <= self.rect.x:
+                speed_x = -9
+            else:
+                speed_x = 9
+            Enemy_projectile_fast(self.game, self.rect.center[0], self.rect.center[1], speed_x)
+            self.last_shot_f = pygame.time.get_ticks()
+        if pygame.time.get_ticks() - self.last_shot >= 25:
+            speed_x = 0
+            if self.game.player.rect.x <= self.rect.x:
+                speed_x = -9
+            else:
+                speed_x = 9
+            Enemy_projectile(self.game, self.rect.center[0], self.rect.center[1], speed_x)
+            self.last_shot = pygame.time.get_ticks()
+                
+class Enemy_projectile(pygame.sprite.Sprite):
+    def __init__(self, game, x, y, speed_x):
+        self.game = game
+        self._layer = PLAYER_LAYER
+        self.groups = self.game.all_sprites, self.game.enemy_projectiles
+        pygame.sprite.Sprite.__init__(self, self.groups)
+        
+        self.image = pygame.Surface([4, 4])
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.speed = [speed_x, random.randint(-3, 3)]
+    
+    def update(self):
+        self.rect.y += self.speed[1]
+        self.rect.x += self.speed[0]
+        if self.rect.x <= 0 or self.rect.x >= WIN_WIDTH:
+            self.kill()
+class Enemy_projectile_fast(pygame.sprite.Sprite):
+    def __init__(self, game, x, y, speed_x):
+        self.game = game
+        self._layer = PLAYER_LAYER
+        self.groups = self.game.all_sprites, self.game.enemy_projectiles_fast
+        pygame.sprite.Sprite.__init__(self, self.groups)
+        
+        self.image = pygame.Surface([12, 5])
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.speed = [speed_x * 4, 0]
+    
+    def update(self):
+        self.rect.y += self.speed[1]
+        self.rect.x += self.speed[0]
+        if self.rect.x <= 0 or self.rect.x >= WIN_WIDTH:
+            self.kill()
                     
