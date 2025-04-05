@@ -135,6 +135,9 @@ class Vegetation(pygame.sprite.Sprite):
     def update(self):
         self.animate()
 
+
+        
+
 class Background_layer_1(pygame.sprite.Sprite):
     def __init__(self, game):
         self.game = game

@@ -1,5 +1,6 @@
 import pygame
 import sys
+from particles import *
 from player import *
 from config import *
 from environment import *
@@ -21,9 +22,9 @@ class Game:
         self.game_font = pygame.font.Font(None, 48)
         self.block_images = dict()
         self.vegetation_images = dict()
-        
+        self.switch_time = 0
         self.background_layer_1_last_update = 0
-        self.background_layer_2_last_update = -1500
+        self.particles_update = 0
     
     def CreateBlock(self):
         """Creates blocks based on the assigned letter:\n
@@ -41,49 +42,60 @@ class Game:
         ground_images = []
         for image in os.listdir(f'IMG/Ground1'):   
             ground_images.append(pygame.image.load(f'IMG/Ground1/{image}').convert_alpha())
-        for i, row in enumerate(tilemap):
-            for j, tile in enumerate(row):
-                match tile:
-                    case 'g':
-                        Block(self, j * 40, i * 40)
-                    case 'w':
-                        Block(self, j * 40, i * 40, has_sides=False)
-                    case 'k':
-                        Block(self, j * 40, i * 40, rotation='upside_down')
-                    case 'a':
-                        Block(self, j * 40, i * 40, rotation='left')
-                    case 'f':
-                        Block(self, j * 40, i * 40, rotation='right')
-                    case 'l':
-                        Block(self, j * 40, i * 40, border=True)
-                    case 'y':
-                        Block(self, j * 40, i * 40, intersection=True)
-                    case 'v':
-                        Block(self, j * 40, i * 40, intersection=True, rotation='left')
-                    case 'h':
-                        Block(self, j * 40, i * 40, intersection=True, rotation='upside_down')
-                    case 'j':
-                        Block(self, j * 40, i * 40, intersection=True, rotation='right')
-                    case 'u':
-                        Block(self, j * 40, i * 40, border=True, rotation='left')
-                    case 'd':
-                        Block(self, j * 40, i * 40, border=True, rotation='upside_down')
-                    case 'r':
-                        Block(self, j * 40, i * 40, border=True, rotation='right')
-                    case 's':
-                        Block(self, j * 40, i * 40, walkthrough=True)
-                    case 'c':
-                        Block(self, j * 40, i * 40, asset_type= 0)
-                    case 't':
-                        Block(self, j * 40, i * 40, asset_type= 1)
-                    case 'p':
-                        self.player = Player(self, j * 40, i * 40)
-                    case 'e':
-                        Enemy(self, j * 40, i * 40)
-                    case 'b':
-                        Border(self, j * 40, i * 40)
-
         # for i, row in enumerate(tilemap):
+        #     for j, tile in enumerate(row):
+        #         match tile:
+        #             case 'g':
+        #                 Block(self, j * 40, i * 40)
+        #             case 'w':
+        #                 Block(self, j * 40, i * 40, has_sides=False)
+        #             case 'k':
+        #                 Block(self, j * 40, i * 40, rotation='upside_down')
+        #             case 'a':
+        #                 Block(self, j * 40, i * 40, rotation='left')
+        #             case 'f':
+        #                 Block(self, j * 40, i * 40, rotation='right')
+        #             case 'l':
+        #                 Block(self, j * 40, i * 40, border=True)
+        #             case 'y':
+        #                 Block(self, j * 40, i * 40, intersection=True)
+        #             case 'v':
+        #                 Block(self, j * 40, i * 40, intersection=True, rotation='left')
+        #             case 'h':
+        #                 Block(self, j * 40, i * 40, intersection=True, rotation='upside_down')
+        #             case 'j':
+        #                 Block(self, j * 40, i * 40, intersection=True, rotation='right')
+        #             case 'u':
+        #                 Block(self, j * 40, i * 40, border=True, rotation='left')
+        #             case 'd':
+        #                 Block(self, j * 40, i * 40, border=True, rotation='upside_down')
+        #             case 'r':
+        #                 Block(self, j * 40, i * 40, border=True, rotation='right')
+        #             case 's':
+        #                 Block(self, j * 40, i * 40, walkthrough=True)
+        #             case 'c':
+        #                 Block(self, j * 40, i * 40, asset_type= 0)
+        #             case 't':
+        #                 Block(self, j * 40, i * 40, asset_type= 1)
+        #             case 'p':
+        #                 self.original = Player(self, j * 40, i * 40)
+        #                 self.player = self.original
+        #             case 'e':
+        #                 self.enemy = Enemy(self, j * 40, i * 40)
+        #             case 'b':
+        #                 Border(self, j * 40, i * 40)
+                        
+        # particles(self, 100)
+        # particles(self, 90)
+        # particles(self, 80)
+        # particles(self, 70)
+        # particles(self, 60)
+        # particles(self, 50)
+        # particles(self, 40)
+        # particles(self, 30)
+        # particles(self, 20)
+
+        for i, row in enumerate(tilemap):
             for j, tile in enumerate(row):
                 match tile:
                     case '/IMG/block_01.png':
@@ -171,7 +183,7 @@ class Game:
         # for position_offset in range(15):
         #     for background in self.background:
         #         background.draw(position_offset)
-        
+        # particle_generator(self)
         if pygame.time.get_ticks() - self.background_layer_1_last_update >= 100:
             Background_layer_1(self)
             self.background_layer_1_last_update = pygame.time.get_ticks()

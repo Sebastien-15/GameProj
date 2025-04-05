@@ -1,8 +1,9 @@
 import pygame
 import os
-from config import *
 import math
 import random
+from config import *
+from utilities import *
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, game, x, y):
@@ -10,7 +11,6 @@ class Player(pygame.sprite.Sprite):
         self._layer = PLAYER_LAYER
         self.groups = self.game.all_sprites
         pygame.sprite.Sprite.__init__(self, self.groups)
-        self.reset = [640, 640]
         self.x = x
         """X-coordinate of the player"""
         self.y = y
@@ -27,6 +27,8 @@ class Player(pygame.sprite.Sprite):
         self.camera_speed_y = 0
         
         # State variables
+        self.last_attack = 0
+        """Cooldown for attacking"""
         self.direction = 'right'
         """Direction of the player"""
         self.camera_reset = [False, [0, 0]]
@@ -156,9 +158,10 @@ class Player(pygame.sprite.Sprite):
     def update(self):
         self.collision_enemy_projectile()
         self.animate()
-        self.movement()
-        self.camera_movement()
-        self.camera_shake()
+        if self.game.player == self:
+            movement(self)
+            camera_movement(self)
+            self.camera_shake()
 
     def camera_shake(self):
         # Camera shake when the player is knocked back
@@ -177,63 +180,8 @@ class Player(pygame.sprite.Sprite):
                 sprite.rect.x -= self.camera_reset[1][0]
                 sprite.rect.y -= self.camera_reset[1][1]
             self.camera_reset = [False, [0, 0]]
-            self.reset[0] -= self.camera_reset[1][0]
-            self.reset[1] -= self.camera_reset[1][1]
         
-    def camera_movement(self):
-        # CAMERA MOVEMENT X-AXIS
-        # If the player is at the edge of the screen, move the blocks instead of the player
-        
-        if self.rect.x >= (WIN_WIDTH * (2 / 3)):
-            if self.camera_speed_x < 4:
-                self.camera_speed_x += 0.3
-            
-        # elif self.rect.x <= (WIN_WIDTH * (1 / 3)) and self.game.border.sprites()[0].rect.x < -self.game.border.sprites()[0].width:
-        elif self.rect.x <= (WIN_WIDTH * (1 / 3)):
-            if self.camera_speed_x > -5:
-                self.camera_speed_x -= 0.3
-        else:
-            if self.camera_speed_x != 0:
-                if self.camera_speed_x > 0:
-                    if self.camera_speed_x < 0.2:
-                        self.camera_speed_x = 0
-                    else:
-                        self.camera_speed_x -= 0.2
-                elif self.camera_speed_x < 0:
-                    # if self.camera_speed_x > -0.2 or self.game.border.sprites()[0].rect.x > -self.game.border.sprites()[0].width:
-                    if self.camera_speed_x > -0.2:
-                        self.camera_speed_x = 0
-                    else:
-                        self.camera_speed_x += 0.2
-        # CAMERA MOVEMENT Y-AXIS
-        # If the player is at the edge of the screen, move the blocks instead of the player
-        if self.rect.y >= (WIN_HEIGHT * (3/4)):
-            if self.camera_speed_y < 9:
-                self.camera_speed_y += 0.3
-        elif self.rect.y <= (WIN_HEIGHT * (1 / 3)):
-            if self.camera_speed_y > -7:
-                self.camera_speed_y -= 0.3
-        else:
-            if self.camera_speed_y != 0:
-                if self.camera_speed_y > 0:
-                    if self.camera_speed_y < 0.6:
-                        self.camera_speed_y = 0
-                    else:
-                        self.camera_speed_y -= 0.6
-                elif self.camera_speed_y < 0:
-                    if self.camera_speed_y > -0.2:
-                        self.camera_speed_y = 0
-                    else:
-                        self.camera_speed_y += 0.2
-                
-        self.game.bg_movement = math.floor(-self.camera_speed_x)
-        for sprite in self.game.all_sprites:
-            sprite.rect.x -= math.ceil(self.camera_speed_x) 
-            sprite.rect.y -= math.ceil(self.camera_speed_y)
-        
-        
-        self.reset[0] -= math.ceil(self.camera_speed_x) 
-        self.reset[1] -= math.ceil(self.camera_speed_y)
+    
                 
     def collision_blocks(self):
         # Collision with the blocks
@@ -261,8 +209,6 @@ class Player(pygame.sprite.Sprite):
             self.falling = True
         self.rect.x += self.dx
         self.rect.y += self.dy
-        self.reset[0] += math.ceil(self.dx)
-        self.reset[1] += math.ceil(self.dy)
     
     def collision_enemy_projectile(self):
         if not self.knockbacked:
@@ -320,84 +266,23 @@ class Player(pygame.sprite.Sprite):
                         self.velocity_y = 20
                         self.Jumping = False
                         self.falling = True
-                        self.knockbacked = True
+                        self.knockbacked = True  
+
+class Trail(pygame.sprite.Sprite):
+    def __init__(self, game, x, y, width, height):
+        self.game = game
+        self._layer = PLAYER_LAYER
+        self.groups = self.game.all_sprites
+        pygame.sprite.Sprite.__init__(self, self.groups)
         
-
-
-    def movement(self):
-        self.dy = 0
-        # print(self.rect.x, self.reset[0])
-        if self.knockbacked:
-            if pygame.time.get_ticks() - self.previous_hit_time > self.invincibility_time:
-                self.knockbacked = False
-                self.camera_reset[0] = True
-            else:
-                # Slowing down the knockback speed
-                if self.dx > 0:
-                    self.dx -= 2
-                elif self.dx < 0:
-                    self.dx += 2
-
-        # Reading all of the key presses
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_r]:
-            self.rect.x = self.reset[0]
-            self.rect.y = self.reset[1]
-            self.reset = [640, 640]
-        if keys[pygame.K_a] and not self.knockbacked:
-            self.dx = -PLAYER_SPEED
-            self.direction = 'left'
-        if keys[pygame.K_d] and not self.knockbacked:
-            self.dx = PLAYER_SPEED
-            self.direction = 'right'
-        if keys[pygame.K_w] and not self.Jumping and not self.falling and not self.knockbacked:
-            if self.state != 'attack':
-                self.frame = 0
-            self.Jumping = True
-            self.velocity_y = -20
-        if keys[pygame.K_ESCAPE]:
-            self.game.running = False
-            self.game.playing = False
-
-        if keys[pygame.K_SPACE] and self.state != 'attack' and not self.knockbacked:
-            self.state = 'attack'
-            self.frame = 0 
-
-        if not keys[pygame.K_a] and not keys[pygame.K_d] and self.dx != 0 and not self.knockbacked:
-            if self.Jumping:
-                if self.dx > 0:
-                    self.dx -= 0.1
-                elif self.dx < 0:
-                    self.dx += 0.1
-            else:
-                if self.dx > 0 and self.dx % 0.25 == 0:
-                    self.dx -= 0.25
-                elif self.dx < 0 and self.dx % 0.25 == 0:
-                    self.dx += 0.25
-                else:
-                    self.dx = 0
+        self.image = pygame.Surface([width, height], pygame.SRCALPHA)
+        self.image.set_alpha(50)
+        self.image.set_colorkey(BLACK)
+        deviation  = random.randint(-10, 10)
         
-        if self.state == 'attack' and not self.Jumping and not self.knockbacked:
-            self.dx = 0
-        
-        
-        if self.state != 'attack':
-            if self.dx != 0 and not self.Jumping:
-                self.state = 'run'
-            else:
-                self.state = 'idle'
-        
-        # Gravity
-        self.velocity_y += 1
-        if self.velocity_y > 20:
-            self.velocity_y = 20
-        self.dy += self.velocity_y
-
-        # Collision with the blocks
-        self.collision_blocks()
-        # Collision with the enemies
-        self.collision_enemies()
-                
+        self.rect = self.image.get_rect()
+        self.rect.centerx = x
+        self.rect.centery = y + deviation
         
 class Attack(pygame.sprite.Sprite):
     def __init__(self, game, x, y, attack_type):
