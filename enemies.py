@@ -94,17 +94,11 @@ class Enemy(pygame.sprite.Sprite):
 
     
     def update(self):
-        self.shoot()
-        if self != self.game.player:
-            self.collision_blocks()
-            self.damaged()
-            self.movement()
-            self.camera_shake()
-            self.gravity()
-        else:
-            movement(self)
-            camera_movement(self)
-            print('enemy is player')
+        self.collision_blocks()
+        self.damaged()
+        self.movement()
+        self.camera_shake()
+        self.gravity()
         
     def camera_shake(self):
         # Camera shake when the player is knocked back
@@ -138,9 +132,7 @@ class Enemy(pygame.sprite.Sprite):
                     self.dx = 20
     
     def movement(self):
-        # Collision with the enemies
-        # If the player collides with the enemy, the player will be knocked back
-        # The player will be knocked back for 1 second and invilnureabilty for 1 second
+        """If Player attack hits the enemy, they will be knockbacked. Also kills the damage number object"""
         if self.dx != 0 and self.knockbacked:
             if self.dx < 0:
                 self.dx += 1
@@ -152,35 +144,56 @@ class Enemy(pygame.sprite.Sprite):
                 self.camera_reset[0] = True
                 self.damage_num.kill()
     
-    def shoot(self):
-        if self != self.game.player:
-            if pygame.time.get_ticks() - self.last_shot_f >= 1000:
-                speed_x = 0
+    # def shoot(self):
+    #     if pygame.time.get_ticks() - self.last_shot_f >= 1000:
+    #         speed_x = 0
+    #         if self.game.player.rect.x <= self.rect.x:
+    #             speed_x = -9
+    #         else:
+    #             speed_x = 9
+    #         Enemy_projectile_fast(self.game, self.rect.center[0], self.rect.center[1], speed_x)
+    #         self.last_shot_f = pygame.time.get_ticks()
+            
+    #     if pygame.time.get_ticks() - self.last_shot >= 25:
+    #         speed_x = 0
+    #         if self.game.player.rect.x <= self.rect.x:
+    #             speed_x = -9
+    #         else:
+    #             speed_x = 9
+    #         # Enemy_projectile(self.game, self.rect.center[0], self.rect.center[1], speed_x)
+    #         self.last_shot = pygame.time.get_ticks()
+
+class Shooter(Enemy):
+    def __init__(self, game, x, y):
+        super().__init__(game, x, y)
+        self.image = pygame.Surface([self.width, self.height])
+        self.image.fill(BLUE)
+        self.last_shot = pygame.time.get_ticks()
+        self.last_move = pygame.time.get_ticks()
+        
+        """Last time the enemy shot"""
+        self.direction = 'left'
+        """Direction of the enemy"""
+    
+    def update(self):
+        super().update()
+        
+    
+    def movement(self):
+        if pygame.time.get_ticks() > self.last_move + 5000:
+            if pygame.time.get_ticks() > self.last_move + 5000:
+                self.dx = 0
+                self.last_move = pygame.time.get_ticks()
+            else:
                 if self.game.player.rect.x <= self.rect.x:
-                    speed_x = -9
+                    self.dx = -2
+                    self.direction = 'left'
                 else:
-                    speed_x = 9
-                Enemy_projectile_fast(self.game, self.rect.center[0], self.rect.center[1], speed_x)
-                self.last_shot_f = pygame.time.get_ticks()
-                
-            if pygame.time.get_ticks() - self.last_shot >= 25:
-                speed_x = 0
-                if self.game.player.rect.x <= self.rect.x:
-                    speed_x = -9
-                else:
-                    speed_x = 9
-                # Enemy_projectile(self.game, self.rect.center[0], self.rect.center[1], speed_x)
-                self.last_shot = pygame.time.get_ticks()
-        else:
-            if pygame.time.get_ticks() - self.last_shot_f >= 1000 and self.state == 'attack':
-                if self.direction == 'right':
-                    speed_x = 9
-                else:
-                    speed_x = -9
-                Enemy_projectile_fast(self.game, self.rect.center[0], self.rect.center[1], speed_x)
-                self.state = 'idle'
-                    
-                
+                    self.dx = 2
+                    self.direction = 'right'
+                self.last_move = pygame.time.get_ticks()
+        
+          
 class Enemy_projectile(pygame.sprite.Sprite):
     def __init__(self, game, x, y, speed_x):
         self.game = game
@@ -203,6 +216,7 @@ class Enemy_projectile(pygame.sprite.Sprite):
         self.rect.x += self.speed[0]
         if self.rect.x <= 0 or self.rect.x >= WIN_WIDTH:
             self.kill()
+            
 class Enemy_projectile_fast(pygame.sprite.Sprite):
     def __init__(self, game, x, y, speed_x):
         self.game = game

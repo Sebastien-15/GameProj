@@ -3,7 +3,7 @@ import math
 from config import *
 
 class Damage_number(pygame.sprite.Sprite):
-    def __init__(self, game, x, y):
+    def __init__(self, game, x, y, damage_num = '1'):
         self.game = game
         self._layer = PLAYER_LAYER
         self.groups = self.game.all_sprites
@@ -14,7 +14,7 @@ class Damage_number(pygame.sprite.Sprite):
         self.rect.x = x
         self.rect.y = y - 20
         
-        self.image.blit(self.game.font.render('1', True, WHITE), (0,0))
+        self.image.blit(self.game.font.render(damage_num, True, WHITE), (0,0))
     
 
 

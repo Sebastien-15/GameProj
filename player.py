@@ -25,6 +25,7 @@ class Player(pygame.sprite.Sprite):
         """Height of the player"""
         self.camera_speed_x = 0
         self.camera_speed_y = 0
+        self.forceCameraShake = 0
         
         # State variables
         self.last_attack = 0
@@ -113,6 +114,7 @@ class Player(pygame.sprite.Sprite):
 
     def animate(self):
         if pygame.time.get_ticks() - self.last_update > 100:
+            # Trail(self.game, self.rect.x, self.rect.y, 50, 50)
             self.frame += 1
             if self.Jumping and not self.falling and not self.knockbacked and self.state != 'attack':
                 if self.frame > (len(self.jump_images) - 1):
@@ -155,17 +157,24 @@ class Player(pygame.sprite.Sprite):
                             self.image = self.attack_images[self.frame]
             self.flip()
     
+    def trail(self):
+        if self.state in ['down_attack', 'side_attack']:
+            Trail(self.game, self.rect.x, self.rect.y, 25, 25)
+            Trail(self.game, self.rect.x + 7, self.rect.y, 20, 20)
+    
     def update(self):
+        # print(self.dy)
         self.collision_enemy_projectile()
         self.animate()
-        if self.game.player == self:
-            movement(self)
-            camera_movement(self)
-            self.camera_shake()
+        # if self.game.player == self:
+        movement(self)
+        camera_movement(self)
+        self.camera_shake()
+        self.trail()
 
     def camera_shake(self):
         # Camera shake when the player is knocked back
-        if self.knockbacked:
+        if self.knockbacked or self.forceCameraShake + 100 >= pygame.time.get_ticks():
             ran_x = random.randint(-3, 3)
             self.camera_reset[1][0] += ran_x
             ran_y = random.randint(-3, 3)
@@ -198,10 +207,17 @@ class Player(pygame.sprite.Sprite):
                         self.Jumping = False
                         self.falling = True
                     elif self.velocity_y >= 0:
-                        self.dy = block.rect.top - self.rect.bottom
-                        self.velocity_y = 0
-                        self.Jumping = False
-                        self.falling = False
+                        if self.state == 'down_attack':
+                            self.dy = block.rect.top - self.rect.bottom
+                            self.velocity_y = -20
+                            self.forceCameraShake = pygame.time.get_ticks()
+                            self.Jumping = False
+                            self.falling = False
+                        else:
+                            self.dy = block.rect.top - self.rect.bottom
+                            self.velocity_y = 0
+                            self.Jumping = False
+                            self.falling = False
         
 
         # Update the position of the player
@@ -272,17 +288,25 @@ class Trail(pygame.sprite.Sprite):
     def __init__(self, game, x, y, width, height):
         self.game = game
         self._layer = PLAYER_LAYER
+        self.timer = pygame.time.get_ticks()
         self.groups = self.game.all_sprites
         pygame.sprite.Sprite.__init__(self, self.groups)
         
         self.image = pygame.Surface([width, height], pygame.SRCALPHA)
         self.image.set_alpha(50)
         self.image.set_colorkey(BLACK)
-        deviation  = random.randint(-10, 10)
+        self.image.fill(WHITE)
         
         self.rect = self.image.get_rect()
-        self.rect.centerx = x
-        self.rect.centery = y + deviation
+        self.rect.x = x
+        self.rect.y = y 
+    
+    def update(self):
+        if pygame.time.get_ticks() - self.timer > 500:
+            self.kill()
+        else:
+            self.rect.x += random.randint(-1, 1)
+            self.rect.y += random.randint(-1, 1)
         
 class Attack(pygame.sprite.Sprite):
     def __init__(self, game, x, y, attack_type):
