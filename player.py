@@ -163,9 +163,9 @@ class Player(pygame.sprite.Sprite):
             Trail(self.game, self.rect.x + 7, self.rect.y, 20, 20)
     
     def update(self):
-        # print(self.dy)
         self.collision_enemy_projectile()
         self.animate()
+        self.collision_enemies()
         # if self.game.player == self:
         movement(self)
         camera_movement(self)
@@ -244,10 +244,10 @@ class Player(pygame.sprite.Sprite):
                     self.previous_hit_time = pygame.time.get_ticks()
                     if projectile.speed[0] > 0:
                         self.knockbacked = True
-                        self.dx = 100 
+                        self.dx = 40 
                     else:
                         self.knockbacked = True
-                        self.dx = -100
+                        self.dx = -40
                     projectile.kill()
                 
 
@@ -260,12 +260,11 @@ class Player(pygame.sprite.Sprite):
                 # Knockback in X-axis
                 if enemy.rect.colliderect(self.rect.x + self.dx, self.rect.y, self.rect.width, self.rect.height):
                     self.previous_hit_time = pygame.time.get_ticks()
-                    if self.dx > 0:
-                        self.rect.x = enemy.rect.x - enemy.rect.width
+                    if self.rect.midleft[0] <= enemy.rect.midleft[0]:
                         self.knockbacked = True
                         self.dx = -20 
-                    elif self.dx < 0:
-                        self.rect.x = enemy.rect.x + enemy.rect.width
+                    else:
+                        print(self.rect.midleft[0], enemy.rect.midright[0])
                         self.knockbacked = True
                         self.dx = 20
                 # Knockback in Y-axis
@@ -317,6 +316,7 @@ class Attack(pygame.sprite.Sprite):
         self.x = x
         self.y = y
         self.attack_type = attack_type
+        self.damage = random.randint(1, 5)
 
         self.image = pygame.Surface([60, 40])
         self.image.set_colorkey(BLACK)

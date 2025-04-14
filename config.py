@@ -15,8 +15,8 @@ GRAY = (192,192,192)
 BG_COLORS = [(193, 149, 77)]
 BLACK_2 = (0, 0, 0, 25)
 
-WIN_HEIGHT = 720
-WIN_WIDTH = 1280
+WIN_HEIGHT = 1080
+WIN_WIDTH = 1920
 FPS = 120
 BLOCK_WIDTH = 40
 BLOCK_HEIGHT = 40
@@ -45,7 +45,7 @@ tilemap = [
     '..................yvhj..........................',
     '............................................g....',
     '..........c.............................t..g.....',
-    '................p.......]...e............g............................................................',
+    '................p.......]..............g............................................................',
     '.............lgcggrgggglggggggg..ggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg......................',
     '............lawwwwfssssahkkkkkk...................',
     '...........lyawwwwfssssaf.........gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggw...........',

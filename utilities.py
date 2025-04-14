@@ -3,18 +3,25 @@ import math
 from config import *
 
 class Damage_number(pygame.sprite.Sprite):
-    def __init__(self, game, x, y, damage_num = '1'):
+    def __init__(self, game, x, y, damage_num = 1):
         self.game = game
         self._layer = PLAYER_LAYER
         self.groups = self.game.all_sprites
         pygame.sprite.Sprite.__init__(self, self.groups)
+        self.timer = pygame.time.get_ticks()
         self.image = pygame.Surface([40,40])
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y - 20
         
-        self.image.blit(self.game.font.render(damage_num, True, WHITE), (0,0))
+        self.image.blit(self.game.font.render(str(damage_num), True, WHITE), (0,0))
+    
+    def update(self):
+        if pygame.time.get_ticks() - self.timer >= 1000:
+            self.kill()
+        else:
+            self.rect.y -= 1
     
 
 

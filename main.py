@@ -4,7 +4,8 @@ from particles import *
 from player import *
 from config import *
 from environment import *
-from enemies import *
+from Enemies.enemies import *
+from Enemies.shooter import *
 
 class Game:
     def __init__(self):
