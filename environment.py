@@ -107,6 +107,7 @@ class Vegetation(pygame.sprite.Sprite):
         match asset_type:
             case 0:
                 self.width = TREE_WIDTH
+                self.last_acorn = pygame.time.get_ticks()
                 self.height = TREE_HEIGHT
                 self.animation_speed = 125
                 x = x - (self.width / 2)
@@ -134,8 +135,63 @@ class Vegetation(pygame.sprite.Sprite):
                 
     def update(self):
         self.animate()
+        self.shoot_acorn()
+    
+    def shoot_acorn(self):
+        if self.asset_type == 0:
+            if pygame.time.get_ticks() - self.last_acorn >= 5000:
+                self.last_acorn = pygame.time.get_ticks()
+                Acorn(self.game, self.rect.x + (self.width / 2), self.rect.y + (self.height / 2) + 125)
 
 
+class Acorn(pygame.sprite.Sprite):
+    def __init__(self, game, x, y):
+        self.game = game
+        self._layer = PROJECTILE_LAYER
+        self.groups = self.game.all_sprites, self.game.enemy_projectiles
+        pygame.sprite.Sprite.__init__(self, self.groups)
+        self.last_update = pygame.time.get_ticks()
+        self.rotation = 0
+        self.rotation_speed = 2
+        self.speed = [0, 0]
+        
+        self.width = 10
+        self.height = 10
+        
+        self.image = pygame.Surface([self.width, self.height])
+        self.image.fill(BLACK)
+        
+        self.rect = self.image.get_rect()
+        self.rect.x = x + random.randint(-100, 100)
+        self.rect.y = y
+        self.dy = 0
+        
+        self.original = self.image
+    
+    def rotate(self):
+        if pygame.time.get_ticks() - self.last_update >= 10:
+            self.dy += 0.1
+            old_center = self.rect.center
+            self.rotation = (self.rotation + self.rotation_speed) % 360 
+            self.image = pygame.transform.rotate(self.original, self.rotation)
+            self.rect = self.image.get_rect()
+            self.last_update = pygame.time.get_ticks()
+            self.rect.center = old_center
+        
+    # def animate(self):
+    #     if pygame.time.get_ticks() - self.last_update > 125:
+    #         self.frame +=1
+    #         self.last_update = pygame.time.get_ticks()
+    #         if self.frame == len(self.game.acorn_images) - 1:
+    #             self.frame = 0
+    #     self.image = self.game.acorn_images[self.frame]
+                
+    def update(self):
+        self.rotate()
+        self.rect.y += self.dy
+        if self.rect.y >= WIN_HEIGHT + self.height:
+            self.kill()
+        
         
 
 class Background_layer_1(pygame.sprite.Sprite):

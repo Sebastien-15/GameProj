@@ -26,6 +26,8 @@ class Game:
         self.switch_time = 0
         self.background_layer_1_last_update = 0
         self.particles_update = 0
+        self.menu = False
+        self.last_pressed = 0
     
     def createBlock(self):
         """Creates blocks based on the assigned letter:\n
@@ -43,50 +45,50 @@ class Game:
         ground_images = []
         for image in os.listdir(f'IMG/Ground1'):   
             ground_images.append(pygame.image.load(f'IMG/Ground1/{image}').convert_alpha())
-        for i, row in enumerate(tilemap):
-            for j, tile in enumerate(row):
-                match tile:
-                    case 'g':
-                        Block(self, j * 40, i * 40)
-                    case 'w':
-                        Block(self, j * 40, i * 40, has_sides=False)
-                    case 'k':
-                        Block(self, j * 40, i * 40, rotation='upside_down')
-                    case 'a':
-                        Block(self, j * 40, i * 40, rotation='left')
-                    case 'f':
-                        Block(self, j * 40, i * 40, rotation='right')
-                    case 'l':
-                        Block(self, j * 40, i * 40, border=True)
-                    case 'y':
-                        Block(self, j * 40, i * 40, intersection=True)
-                    case 'v':
-                        Block(self, j * 40, i * 40, intersection=True, rotation='left')
-                    case 'h':
-                        Block(self, j * 40, i * 40, intersection=True, rotation='upside_down')
-                    case 'j':
-                        Block(self, j * 40, i * 40, intersection=True, rotation='right')
-                    case 'u':
-                        Block(self, j * 40, i * 40, border=True, rotation='left')
-                    case 'd':
-                        Block(self, j * 40, i * 40, border=True, rotation='upside_down')
-                    case 'r':
-                        Block(self, j * 40, i * 40, border=True, rotation='right')
-                    case 's':
-                        Block(self, j * 40, i * 40, walkthrough=True)
-                    case 'c':
-                        Block(self, j * 40, i * 40, asset_type= 0)
-                    case 't':
-                        Block(self, j * 40, i * 40, asset_type= 1)
-                    case 'p':
-                        self.original = Player(self, j * 40, i * 40)
-                        self.player = self.original
-                    case 'e':
-                        self.enemy = Enemy(self, j * 40, i * 40)
-                    case 'b':
-                        Border(self, j * 40, i * 40)
-                    case ']':
-                        Shooter(self, j * 40, i * 40)
+        # for i, row in enumerate(tilemap):
+        #     for j, tile in enumerate(row):
+        #         match tile:
+        #             case 'g':
+        #                 Block(self, j * 40, i * 40)
+        #             case 'w':
+        #                 Block(self, j * 40, i * 40, has_sides=False)
+        #             case 'k':
+        #                 Block(self, j * 40, i * 40, rotation='upside_down')
+        #             case 'a':
+        #                 Block(self, j * 40, i * 40, rotation='left')
+        #             case 'f':
+        #                 Block(self, j * 40, i * 40, rotation='right')
+        #             case 'l':
+        #                 Block(self, j * 40, i * 40, border=True)
+        #             case 'y':
+        #                 Block(self, j * 40, i * 40, intersection=True)
+        #             case 'v':
+        #                 Block(self, j * 40, i * 40, intersection=True, rotation='left')
+        #             case 'h':
+        #                 Block(self, j * 40, i * 40, intersection=True, rotation='upside_down')
+        #             case 'j':
+        #                 Block(self, j * 40, i * 40, intersection=True, rotation='right')
+        #             case 'u':
+        #                 Block(self, j * 40, i * 40, border=True, rotation='left')
+        #             case 'd':
+        #                 Block(self, j * 40, i * 40, border=True, rotation='upside_down')
+        #             case 'r':
+        #                 Block(self, j * 40, i * 40, border=True, rotation='right')
+        #             case 's':
+        #                 Block(self, j * 40, i * 40, walkthrough=True)
+        #             case 'c':
+        #                 Block(self, j * 40, i * 40, asset_type= 0)
+        #             case 't':
+        #                 Block(self, j * 40, i * 40, asset_type= 1)
+        #             case 'p':
+        #                 self.original = Player(self, j * 40, i * 40)
+        #                 self.player = self.original
+        #             case 'e':
+        #                 self.enemy = Enemy(self, j * 40, i * 40)
+        #             case 'b':
+        #                 Border(self, j * 40, i * 40)
+        #             case ']':
+        #                 Shooter(self, j * 40, i * 40)
                         
         # particles(self, 100)
         # particles(self, 90)
@@ -98,47 +100,47 @@ class Game:
         # particles(self, 30)
         # particles(self, 20)
 
-        # for i, row in enumerate(tilemap):
-        #     for j, tile in enumerate(row):
-        #         match tile:
-        #             case '/IMG/block_01.png':
-        #                 Block(self, i * 40, j * 40)
-        #             case '/IMG/block_05.png':
-        #                 Block(self, i * 40, j * 40, has_sides=False)
-        #             case '/IMG/block_03.png':
-        #                 Block(self, i * 40, j * 40, rotation='upside_down')
-        #             case '/IMG/block_02.png':
-        #                 Block(self, i * 40, j * 40, rotation='left')
-        #             case '/IMG/block_04.png':
-        #                 Block(self, i * 40, j * 40, rotation='right')
-        #             case '/IMG/intersection_01.png':
-        #                 Block(self, i * 40, j * 40, intersection=True)
-        #             case '/IMG/intersection_02.png':
-        #                 Block(self, i * 40, j * 40, intersection=True, rotation='left')
-        #             case '/IMG/intersection_03.png':
-        #                 Block(self, i * 40, j * 40, intersection=True, rotation='upside_down')
-        #             case '/IMG/intersection_04.png':
-        #                 Block(self, i * 40, j * 40, intersection=True, rotation='right')
-        #             case '/IMG/border_01.png':
-        #                 Block(self, i * 40, j * 40, border=True)
-        #             case '/IMG/border_02.png':
-        #                 Block(self, i * 40, j * 40, border=True, rotation='left')
-        #             case '/IMG/border_03.png':
-        #                 Block(self, i * 40, j * 40, border=True, rotation='upside_down')
-        #             case '/IMG/border_04.png':
-        #                 Block(self, i * 40, j * 40, border=True, rotation='right')
-        #             case '/IMG/walkthrough_01.png':
-        #                 Block(self, i * 40, j * 40, walkthrough=True)
-        #             case '/IMG/tree.png':
-        #                 Block(self, i * 40, j * 40, asset_type= 0)
-        #             case '/IMG/bush.png':
-        #                 Block(self, i * 40, j * 40, asset_type= 1)
-        #             case '/IMG/idle_1.png':
-        #                 self.player = Player(self, i * 40, j * 40)
-        #             case '/IMG/enemy_1.png':
-        #                 Enemy(self, i * 40, j * 40)
-        #             case 'b':
-        #                 Border(self, i * 40, j * 40)
+        for i, row in enumerate(tilemap):
+            for j, tile in enumerate(row):
+                match tile:
+                    case '/IMG/block_01.png':
+                        Block(self, i * 40, j * 40)
+                    case '/IMG/block_05.png':
+                        Block(self, i * 40, j * 40, has_sides=False)
+                    case '/IMG/block_03.png':
+                        Block(self, i * 40, j * 40, rotation='upside_down')
+                    case '/IMG/block_02.png':
+                        Block(self, i * 40, j * 40, rotation='left')
+                    case '/IMG/block_04.png':
+                        Block(self, i * 40, j * 40, rotation='right')
+                    case '/IMG/intersection_01.png':
+                        Block(self, i * 40, j * 40, intersection=True)
+                    case '/IMG/intersection_02.png':
+                        Block(self, i * 40, j * 40, intersection=True, rotation='left')
+                    case '/IMG/intersection_03.png':
+                        Block(self, i * 40, j * 40, intersection=True, rotation='upside_down')
+                    case '/IMG/intersection_04.png':
+                        Block(self, i * 40, j * 40, intersection=True, rotation='right')
+                    case '/IMG/border_01.png':
+                        Block(self, i * 40, j * 40, border=True)
+                    case '/IMG/border_02.png':
+                        Block(self, i * 40, j * 40, border=True, rotation='left')
+                    case '/IMG/border_03.png':
+                        Block(self, i * 40, j * 40, border=True, rotation='upside_down')
+                    case '/IMG/border_04.png':
+                        Block(self, i * 40, j * 40, border=True, rotation='right')
+                    case '/IMG/walkthrough_01.png':
+                        Block(self, i * 40, j * 40, walkthrough=True)
+                    case '/IMG/tree.png':
+                        Block(self, i * 40, j * 40, asset_type= 0)
+                    case '/IMG/bush.png':
+                        Block(self, i * 40, j * 40, asset_type= 1)
+                    case '/IMG/idle_1.png':
+                        self.player = Player(self, i * 40, j * 40)
+                    case '/IMG/enemy_1.png':
+                        Enemy(self, i * 40, j * 40)
+                    case 'b':
+                        Border(self, i * 40, j * 40)
                         
     
 
@@ -159,6 +161,19 @@ class Game:
     
     def events(self):
         # Game Loop - Events
+        self.keys = pygame.key.get_pressed()
+        if self.keys[pygame.K_m] and not self.menu and pygame.time.get_ticks() - self.last_pressed >= 500:
+            self.last_pressed = pygame.time.get_ticks()
+            self.menu = True
+        elif self.keys[pygame.K_m] and self.menu and pygame.time.get_ticks() - self.last_pressed >= 500:
+            self.last_pressed = pygame.time.get_ticks()
+            self.menu = False
+        
+        if self.keys[pygame.K_r]:
+            self.playing = False
+            self.new()
+            
+            
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
@@ -167,7 +182,7 @@ class Game:
     
     def update(self):
         # Game Loop - Update
-        if self.last_update < pygame.time.get_ticks():    
+        if self.last_update < pygame.time.get_ticks() and not self.menu:    
             self.all_sprites.update()
             if self.bg_movement:
                 self.background.update()
@@ -187,7 +202,7 @@ class Game:
         #     for background in self.background:
         #         background.draw(position_offset)
         # particle_generator(self)
-        if pygame.time.get_ticks() - self.background_layer_1_last_update >= 100:
+        if pygame.time.get_ticks() - self.background_layer_1_last_update >= 100 and not self.menu:
             Background_layer_1(self)
             self.background_layer_1_last_update = pygame.time.get_ticks()
         # if pygame.time.get_ticks() - self.background_layer_2_last_update >= 1500:

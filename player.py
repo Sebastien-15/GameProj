@@ -167,10 +167,116 @@ class Player(pygame.sprite.Sprite):
         self.animate()
         self.collision_enemies()
         # if self.game.player == self:
-        movement(self)
+        self.movement()
         camera_movement(self)
         self.camera_shake()
         self.trail()
+        
+    def movement(self):
+        self.dy = 0
+        # print(self.rect.x, self.reset[0])
+        if self.knockbacked:
+            if pygame.time.get_ticks() - self.previous_hit_time > self.invincibility_time:
+                self.knockbacked = False
+                self.camera_reset[0] = True
+            else:
+                # Slowing down the knockback speed
+                if self.dx > 0:
+                    self.dx -= 2
+                elif self.dx < 0:
+                    self.dx += 2
+
+        # Reading all of the key presses
+        if self.game.keys[pygame.K_a] and not self.knockbacked:
+            if self.dx > -PLAYER_SPEED:
+                self.dx += -1
+            self.direction = 'left'
+        if self.game.keys[pygame.K_d] and not self.knockbacked:
+            if self.dx < PLAYER_SPEED:
+                self.dx += 1
+            self.direction = 'right'
+        if self.game.keys[pygame.K_w] and not self.Jumping and not self.falling and not self.knockbacked:
+            if self.state != 'attack':
+                self.frame = 0
+            self.Jumping = True
+            self.velocity_y = -22
+        if self.game.keys[pygame.K_ESCAPE]:
+            self.game.running = False
+            self.game.playing = False
+
+        if self.game.keys[pygame.K_SPACE] and self.state not in ['attack', 'down_attack', 'side_attack'] and not self.knockbacked:
+            if self.last_attack + 600 < pygame.time.get_ticks():
+                if True in [self.game.keys[pygame.K_a], self.game.keys[pygame.K_d]]:
+                    self.state = 'side_attack'
+                    self.frame = 0
+                elif self.game.keys[pygame.K_s] and True in [self.Jumping, self.falling]:
+                    self.state = 'down_attack'
+                    self.frame = 0
+                else:
+                    self.state = 'attack'
+                    self.frame = 0 
+                self.last_attack = pygame.time.get_ticks()
+
+        if not self.game.keys[pygame.K_a] and not self.game.keys[pygame.K_d] and self.dx != 0 and not self.knockbacked:
+            if self.Jumping:
+                if self.dx > 0:
+                    self.dx -= 0.1
+                elif self.dx < 0:
+                    self.dx += 0.1
+            else:
+                if self.dx > 0 and self.dx % 0.25 == 0:
+                    self.dx -= 0.25
+                elif self.dx < 0 and self.dx % 0.25 == 0:
+                    self.dx += 0.25
+                else:
+                    self.dx = 0
+        
+        # if self.state == 'attack' and not self.Jumping and not self.knockbacked:
+        #     self.dx = 0
+        
+        
+        if self.state not in ['attack', 'down_attack', 'side_attack']:
+            if self.dx != 0 and not self.Jumping:
+                self.state = 'run'
+            else:
+                self.state = 'idle'
+        
+        # Gravity
+        self.velocity_y += 1
+        if self.velocity_y > 20 and self.state != 'down_attack':
+            self.velocity_y = 20
+        self.dy += self.velocity_y
+
+        # Collision with the blocks
+        self.collision_blocks()
+        # Collision with the enemies
+        # self.collision_enemies()
+        
+        
+                            
+        match self.state:
+            case 'down_attack':
+                if True in [self.falling, self.Jumping]:
+                    self.velocity_y = 30
+                    if self.direction == 'right':
+                        self.dx = 15
+                    else:
+                        self.dx = -15
+                else:
+                    self.dx = 0
+                    self.state = 'idle'
+                    
+            case 'side_attack':
+                if self.frame >= 2:
+                    self.frame = 0
+                    self.state = 'idle'
+                    self.dx = 0
+                else:
+                    if self.direction == 'right':
+                        self.dx = 30
+                    else:
+                        self.dx = -30
+
 
     def camera_shake(self):
         # Camera shake when the player is knocked back
@@ -234,6 +340,9 @@ class Player(pygame.sprite.Sprite):
                     if projectile.speed[0] > 0:
                         self.knockbacked = True
                         self.dx = 10 
+                    elif projectile.speed[0] == 0:
+                        self.knockbacked = True
+                        self.dx = 0
                     else:
                         self.knockbacked = True
                         self.dx = -10
@@ -254,7 +363,7 @@ class Player(pygame.sprite.Sprite):
     def collision_enemies(self):
         # Collision with the enemies
         # If the player collides with the enemy, the player will be knocked back
-        # The player will be knocked back for 1 second and invilnureabilty for 1 second
+        # The player will be knocked back for 1 second and invulnureabilty for 1 second
         if not self.knockbacked:
             for enemy in self.game.enemies:
                 # Knockback in X-axis
